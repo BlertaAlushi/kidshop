@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_languages', function (Blueprint $table) {
-            $table->foreignId('product_id')->constrained()->onDelete('cascade');
-            $table->foreignId('language_id')->constrained()->onDelete('cascade');
+        Schema::create('colors', function (Blueprint $table) {
+            $table->id();
             $table->string('name');
-            $table->string('description');
+            $table->string('hex_code', 7)->nullable();
             $table->timestamps();
 
-            $table->primary(['product_id', 'language_id']);
+            $table->unique('name');
         });
     }
 
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_langauges');
+        Schema::dropIfExists('colors');
     }
 };

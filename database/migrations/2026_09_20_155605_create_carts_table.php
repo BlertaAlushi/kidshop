@@ -11,15 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('marks', function (Blueprint $table) {
-            $table->dropColumn('origin_country');
+        Schema::create('carts', function (Blueprint $table) {
+            $table->id();
+            $table->string('session_id')->unique();
+            $table->timestamps();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
-        Schema::table('marks', function (Blueprint $table) {
-            $table->string('origin_country')->nullable();
-        });
+        Schema::dropIfExists('carts');
     }
 };

@@ -11,11 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('marks', function (Blueprint $table) {
+        Schema::create('promotions', function (Blueprint $table) {
             $table->id();
-            $table->string('slug')->unique();
+
             $table->string('name');
-            $table->string('origin_country');
+
+            $table->enum('type', [
+                'percentage',
+                'fixed',
+            ]);
+
+            $table->decimal('value', 10, 2);
+
+            $table->timestamp('starts_at')->nullable();
+            $table->timestamp('ends_at')->nullable();
+
+            $table->boolean('is_active')->default(true);
+
             $table->timestamps();
         });
     }
@@ -25,6 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('marks');
+        Schema::dropIfExists('promotions');
     }
 };
