@@ -1,0 +1,68 @@
+{
+    "new": "New",
+    "update": "Update",
+    "create": "Create",
+    "product": "Product",
+    "default_name": "Default name",
+    "default_description": "Default Description",
+    "image": "Image",
+    "price": "Price",
+    "stock_quantity": "Stock Quantity",
+    "translations": "Translations",
+    "relations": "Relations",
+    "currency": "Currency",
+    "name": "Name",
+    "description": "Description",
+    "select": "Select",
+    "code": "Code",
+    "language": "Language",
+    "slug": "Slug",
+    "skin-types": {
+        "new": "New Skin Type",
+        "edit": "Edit Skin Type",
+        "edited_success": "Skin type edited successfully!",
+        "created_success": "Skin type created successfully!"
+    },
+    "skin-concerns": {
+        "new": "New Skin Concern",
+        "edit": "Edit Skin Concern",
+        "edited_success": "Skin concern edited successfully!",
+        "created_success": "Skin concern created successfully!"
+    },
+    "product-types": {
+        "new": "New Product Type",
+        "edit": "Edit Product Type",
+        "edited_success": "Product type edited successfully!",
+        "created_success": "Product type created successfully!"
+    },
+    "body-parts": {
+        "new": "New Body Part",
+        "edit": "Edit Body Part",
+        "edited_success": "Body part edited successfully!",
+        "created_success": "Body part created successfully!"
+    },
+    "extras": {
+        "new": "New Extra",
+        "edit": "Edit Extra",
+        "edited_success": "Extra edited successfully!",
+        "created_success": "Extra created successfully!"
+    },
+    "marks": {
+        "new": "New Mark",
+        "edit": "Edit Mark",
+        "edited_success": "Mark edited successfully!",
+        "created_success": "Mark created successfully!"
+    },
+    "languages": {
+        "new": "New Language",
+        "edit": "Edit Language",
+        "edited_success": "Language edited successfully!",
+        "created_success": "Language created successfully!"
+    },
+    "products": {
+        "new": "New Product",
+        "edit": "Edit Product",
+        "edited_success": "Product edited successfully!",
+        "created_success": "Product created successfully!"
+    }
+}
