@@ -34,6 +34,16 @@
     "add": "Add",
     "yes": "Yes",
     "no": "No",
+    "type": "Type",
+    "value": "Value",
+    "percentage": "Percentage",
+    "fixed": "Fixed",
+    "starts_at": "Starts At",
+    "ends_at": "Ends At",
+    "target_type": "Target Type",
+    "target": "Target",
+    "targets": "Targets",
+    "none": "None",
     "skin-types": {
         "new": "New Skin Type",
         "edit": "Edit Skin Type",
@@ -119,5 +129,12 @@
         "edited_success": "Product edited successfully!",
         "created_success": "Product created successfully!",
         "deleted_success": "Product deleted successfully!"
+    },
+    "promotions": {
+        "new": "New Promotion",
+        "edit": "Edit Promotion",
+        "edited_success": "Promotion edited successfully!",
+        "created_success": "Promotion created successfully!",
+        "deleted_success": "Promotion deleted successfully!"
     }
 }

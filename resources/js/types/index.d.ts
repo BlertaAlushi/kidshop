@@ -205,6 +205,25 @@ export interface AdminProductImage {
     color?: Color;
 }
 
+export interface PromotionTargetForm {
+    id?: number;
+    type: 'product' | 'category' | 'brand';
+    target_id: number | null;
+    color_id: number | null;
+}
+
+export interface Promotion {
+    id: number;
+    name: string;
+    type: 'percentage' | 'fixed';
+    value: number;
+    starts_at: string | null;
+    ends_at: string | null;
+    is_active: boolean;
+    targets?: PromotionTargetForm[];
+    targets_count?: number;
+}
+
 export interface AdminProduct {
     id: number;
     category_id: number;

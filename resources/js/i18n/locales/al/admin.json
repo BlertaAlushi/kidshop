@@ -34,6 +34,16 @@
     "add": "Shto",
     "yes": "Po",
     "no": "Jo",
+    "type": "Tipi",
+    "value": "Vlera",
+    "percentage": "Përqindje",
+    "fixed": "Fikse",
+    "starts_at": "Fillon Më",
+    "ends_at": "Përfundon Më",
+    "target_type": "Lloji i Targetit",
+    "target": "Targeti",
+    "targets": "Targetet",
+    "none": "Asnjë",
     "skin-types": {
         "new": "New Skin Type",
         "edit": "Edit Skin Type",
@@ -117,5 +127,12 @@
         "edited_success": "Product edited successfully!",
         "created_success": "Product created successfully!",
         "deleted_success": "Produkti u fshi me sukses!"
+    },
+    "promotions": {
+        "new": "Promocion i Ri",
+        "edit": "Ndrysho Promocionin",
+        "edited_success": "Promocioni u ndryshua me sukses!",
+        "created_success": "Promocioni u krijua me sukses!",
+        "deleted_success": "Promocioni u fshi me sukses!"
     }
 }

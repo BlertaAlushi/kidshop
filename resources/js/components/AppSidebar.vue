@@ -56,6 +56,11 @@ const mainNavItems = computed<NavItem[]>(() => [
         href: route('admin.countries.index'),
         icon: List,
     },
+    {
+        title: t('home.promotions'),
+        href: route('admin.promotions.index'),
+        icon: List,
+    },
 ]);
 
 const footerNavItems: NavItem[] = [];

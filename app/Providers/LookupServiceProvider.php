@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ColorsController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CountriesController;
 use App\Http\Controllers\Admin\ProductsController;
+use App\Http\Controllers\Admin\PromotionsController;
 use App\Http\Controllers\Admin\SizesController;
 use App\Interfaces\Services\LookupInterface;
 use App\Services\CategoriesService;
@@ -14,6 +15,7 @@ use App\Services\ColorsService;
 use App\Services\CountriesService;
 use App\Services\MarksService;
 use App\Services\Products\ProductsService;
+use App\Services\PromotionsService;
 use App\Services\SizesService;
 use Illuminate\Support\ServiceProvider;
 
@@ -55,5 +57,9 @@ class LookupServiceProvider extends ServiceProvider
         $this->app->when(CountriesController::class)
             ->needs(LookupInterface::class)
             ->give(CountriesService::class);
+
+        $this->app->when(PromotionsController::class)
+            ->needs(LookupInterface::class)
+            ->give(PromotionsService::class);
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\CountriesController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\ProductsController;
+use App\Http\Controllers\Admin\PromotionsController;
 use App\Http\Controllers\Admin\SizesController;
 use Illuminate\Support\Facades\Route;
 
@@ -53,5 +54,12 @@ Route::prefix('/admin')->middleware(['auth', 'isAdmin'])->name('admin.')->group(
     Route::get('/countries/{country}/edit', [CountriesController::class, 'edit'])->name('countries.edit');
     Route::put('/countries/{country}', [CountriesController::class, 'update'])->name('countries.update');
     Route::delete('/countries/{country}', [CountriesController::class, 'destroy'])->name('countries.destroy');
+
+    Route::get('/promotions', [PromotionsController::class, 'index'])->name('promotions.index');
+    Route::get('/promotions/create', [PromotionsController::class, 'create'])->name('promotions.create');
+    Route::post('/promotions', [PromotionsController::class, 'store'])->name('promotions.store');
+    Route::get('/promotions/{promotion}/edit', [PromotionsController::class, 'edit'])->name('promotions.edit');
+    Route::put('/promotions/{promotion}', [PromotionsController::class, 'update'])->name('promotions.update');
+    Route::delete('/promotions/{promotion}', [PromotionsController::class, 'destroy'])->name('promotions.destroy');
 
 });
