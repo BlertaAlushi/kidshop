@@ -4,12 +4,10 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateCartRequest;
-use App\Jobs\LowStockNotification;
-use App\Models\CartProduct;
+use App\Models\CartItem;
+use App\Models\Country;
 use App\Services\CartService;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Validator;
 
 class CartController extends Controller
 {
@@ -18,7 +16,7 @@ class CartController extends Controller
     ){}
     public function index(){
         $cart = $this->cartService->index();
-        return Inertia::render('user/Cart', ["cartProducts" => $cart]);
+        return Inertia::render('user/Cart', ["cartItems" => $cart]);
     }
 
     public function addToCart(UpdateCartRequest $request){
@@ -27,14 +25,14 @@ class CartController extends Controller
         return response(null, 200);
     }
 
-    public function updateCartProduct(UpdateCartRequest $request, CartProduct $cartProduct){
+    public function updateCartItem(UpdateCartRequest $request, CartItem $cartItem){
         $data = $request->validated();
-        $this->cartService->updateCart($data,$cartProduct);
+        $this->cartService->updateCart($data, $cartItem);
         return response(null, 200);
     }
 
-    public function removeFromCart(CartProduct  $cartProduct){
-        $cartProduct->delete();
+    public function removeFromCart(CartItem $cartItem){
+        $cartItem->delete();
         return redirect()->back();
     }
 
@@ -43,6 +41,9 @@ class CartController extends Controller
         if(!$cart->count()){
             return redirect()->route('home');
         }
-        return Inertia::render('user/Checkout', ["cartProducts" => $cart]);
+        return Inertia::render('user/Checkout', [
+            'cartItems' => $cart,
+            'countries' => Country::orderBy('country')->get(['iso_2', 'country', 'delivery_fee']),
+        ]);
     }
 }

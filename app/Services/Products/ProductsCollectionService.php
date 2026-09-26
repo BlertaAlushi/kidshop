@@ -8,80 +8,81 @@ use App\Resources\Products\ProductResource;
 
 class ProductsCollectionService implements ProductsCollectionInterface
 {
-    protected array $pivotFilters = [
-        'skin_types'     => 'skinTypes',
-        'skin_concerns'  => 'skinConcerns',
-        'product_types'  => 'productTypes',
-        'extras'         => 'extras',
-        'body_parts'     => 'bodyParts',
-        'marks'          => 'marks',
-    ];
-    public function products($filters){
-        $query = Product::query();
+    public function products($filters)
+    {
+        $query = Product::query()->where('is_active', true);
 
         if (!empty($filters['search'])) {
             $search = $filters['search'];
-
-            $query->whereHas('translation', function ($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%'.$search.'%')
                     ->orWhere('description', 'like', '%'.$search.'%');
             });
         }
 
-        foreach ($this->pivotFilters as $filterKey => $relation) {
-            if (!empty($filters[$filterKey])) {
-                if($filterKey == 'marks'){
-                    $query->where('mark_id', $filters[$filterKey]);
-                }else {
-                    $query->whereHas($relation, function ($q) use ($filters, $filterKey) {
-                        $q->whereIn('id', $filters[$filterKey]);
-                    });
-                }
-            }
+        if (!empty($filters['categories'])) {
+            $query->whereIn('category_id', $filters['categories']);
         }
 
+        if (!empty($filters['brands'])) {
+            $query->whereIn('brand_id', $filters['brands']);
+        }
 
-        switch ($filters['order_by']) {
+        if (!empty($filters['gender'])) {
+            $query->whereIn('gender', [$filters['gender'], 'unisex']);
+        }
+
+        if (!empty($filters['seasons'])) {
+            $query->whereHas('seasons', function ($q) use ($filters) {
+                $q->whereIn('seasons.id', $filters['seasons']);
+            });
+        }
+
+        if (!empty($filters['colors'])) {
+            $query->whereHas('variants', function ($q) use ($filters) {
+                $q->whereIn('color_id', $filters['colors']);
+            });
+        }
+
+        if (!empty($filters['sizes'])) {
+            $query->whereHas('variants', function ($q) use ($filters) {
+                $q->whereIn('size_id', $filters['sizes']);
+            });
+        }
+
+        $query->withMin('variants', 'price');
+
+        switch ($filters['order_by'] ?? null) {
             case 'price_high_to_low':
-                $query->orderBy('price', 'desc');
+                $query->orderByDesc('variants_min_price');
                 break;
             case 'price_low_to_high':
-                $query->orderBy('price', 'asc');
+                $query->orderBy('variants_min_price');
                 break;
             case 'date_old_to_new':
                 $query->orderBy('created_at', 'asc');
                 break;
-            case 'availability':
-                $query->orderBy('stock_quantity', 'desc');
+            default:
+                $query->orderBy('created_at', 'desc');
                 break;
-                default:
-            $query->orderBy('created_at', 'desc');
-            break;
-
         }
 
-        $products = $query
-            ->with([
-                'translation:product_id,language_id,name,description',
-                'mark'
-            ])
-            ->select('id', 'slug', 'price', 'currency', 'image', 'mark_id','stock_quantity');
+        $products = $query->with(['category', 'brand', 'images', 'variants.color']);
 
-        $products = match ($filters['per_page']) {
+        $products = match ($filters['per_page'] ?? null) {
             '24' => $products->paginate(24)->withQueryString(),
             '48' => $products->paginate(48)->withQueryString(),
             default => $products->paginate(12)->withQueryString(),
         };
+
         return ProductResource::collection($products);
     }
 
     public function newArrivals()
     {
         return ProductResource::collection(
-            Product::with([
-                'translation:product_id,language_id,name,description',
-                'mark'
-            ])
+            Product::where('is_active', true)
+                ->with(['category', 'brand', 'images', 'variants.color'])
                 ->latest()
                 ->take(9)
                 ->get()

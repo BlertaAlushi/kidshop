@@ -149,7 +149,9 @@ const deleteSelected = (id: number) => {
                                 class="group h-9 w-9 cursor-pointer"
                                 @click="
                                     editSelected(
-                                        row.original.slug ?? row.original.code,
+                                        row.original.slug ??
+                                            row.original.code ??
+                                            row.original.id,
                                     )
                                 "
                             >

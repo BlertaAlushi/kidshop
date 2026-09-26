@@ -4,90 +4,146 @@ namespace App\Services\Products;
 
 use App\Interfaces\Services\LookupInterface;
 use App\Models\Product;
-use App\Resources\Products\ProductResource;
+use App\Models\ProductImage;
+use App\Models\ProductVariant;
 use App\Services\LookupBaseService;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductsService extends LookupBaseService implements LookupInterface
 {
-    public function __construct(){
+    public function __construct()
+    {
         $this->model = Product::class;
     }
 
-    public function index(){
-        $products = $this->model::with('mark:id,name')->get();
-        return ProductResource::collection($products);
+    public function index()
+    {
+        return $this->model::query()
+            ->with(['category:id,name', 'brand:id,name'])
+            ->withCount('variants')
+            ->get(['id', 'category_id', 'brand_id', 'name', 'slug', 'gender', 'is_active']);
     }
 
-    public function store($data){
-        $create = [
+    public function store($data)
+    {
+        $product = $this->model::create([
+            'category_id' => $data['category_id'],
+            'brand_id' => $data['brand_id'],
             'name' => $data['name'],
             'slug' => $data['slug'] ?? Str::slug($data['name']),
-            'description' => $data['description'],
-            'stock_quantity' => $data['stock_quantity'],
-            'price' => $data['price'],
-            'currency' => $data['currency'],
-            'mark_id' => $data['mark_id'],
-        ];
-        if(!empty($data['image'])){
-            $create['image'] = $data['image'];
-        }
-        $product = $this->model::create($create);
-
-        foreach ($data['translations'] as $translation) {
-            $product->translations()->create([
-                'language_id' => $translation['language_id'],
-                'name' => $translation['name'],
-                'description' => $translation['description'],
-            ]);
-        }
-
-        $this->syncPivots($product, $data);
-    }
-
-    public function update($data,$item){
-        $item->update([
-            'name' => $data['name'],
-            'slug' => $data['slug'] ?? Str::slug($data['name']),
-            'description' => $data['description'],
-            'stock_quantity' => $data['stock_quantity'],
-            'price' => $data['price'],
-            'currency' => $data['currency'],
-            'mark_id' => $data['mark_id'],
-            'image' => $data['image'],
+            'description' => $data['description'] ?? null,
+            'gender' => $data['gender'],
+            'is_active' => $data['is_active'] ?? true,
         ]);
 
-        foreach ($data['translations'] as $translation) {
-            $updated = $item->translations()
-                ->where('language_id', $translation['language_id'])
-                ->update([
-                    'name' => $translation['name'],
-                    'description' => $translation['description'],
-                ]);
+        $this->syncSeasons($product, $data);
+        $this->syncVariants($product, $data);
+        $this->syncImages($product, $data);
 
-            if (!$updated) {
-                $item->translations()->create([
-                    'language_id' => $translation['language_id'],
-                    'name' => $translation['name'],
-                    'description' => $translation['description'],
-                ]);
-            }
-        }
-
-        $this->syncPivots($item, $data);
+        return $product;
     }
 
-    /**
-     * @param $product
-     * @param $data
-     * @return void
-     */
-    public function syncPivots($product, $data): void
+    public function update($data, $item)
     {
-        $product->bodyParts()->sync($data['body_parts'] ?? []);
-        $product->skinTypes()->sync($data['skin_types'] ?? []);
-        $product->skinConcerns()->sync($data['skin_concerns'] ?? []);
-        $product->productTypes()->sync($data['product_types'] ?? []);
-        $product->extras()->sync($data['extras'] ?? []);
+        $item->update([
+            'category_id' => $data['category_id'],
+            'brand_id' => $data['brand_id'],
+            'name' => $data['name'],
+            'slug' => $data['slug'] ?? Str::slug($data['name']),
+            'description' => $data['description'] ?? null,
+            'gender' => $data['gender'],
+            'is_active' => $data['is_active'] ?? true,
+        ]);
+
+        $this->syncSeasons($item, $data);
+        $this->syncVariants($item, $data);
+        $this->syncImages($item, $data);
+
+        return $item;
+    }
+
+    protected function syncSeasons(Product $product, array $data): void
+    {
+        $product->seasons()->sync($data['seasons'] ?? []);
+    }
+
+    protected function syncVariants(Product $product, array $data): void
+    {
+        $keepIds = [];
+
+        foreach ($data['variants'] ?? [] as $variant) {
+            $attributes = [
+                'size_id' => $variant['size_id'],
+                'color_id' => $variant['color_id'],
+                'sku' => $variant['sku'],
+                'price' => $variant['price'],
+                'stock_quantity' => $variant['stock_quantity'],
+                'is_active' => $variant['is_active'] ?? true,
+            ];
+
+            /** @var ProductVariant|null $row */
+            $row = !empty($variant['id'])
+                ? $product->variants()->find($variant['id'])
+                : null;
+
+            if ($row) {
+                $row->update($attributes);
+            } else {
+                $row = $product->variants()->create($attributes);
+            }
+
+            $keepIds[] = $row->id;
+        }
+
+        $product->variants()->whereNotIn('id', $keepIds)->delete();
+    }
+
+    protected function syncImages(Product $product, array $data): void
+    {
+        $keepIds = [];
+        $primaryAssigned = false;
+
+        foreach ($data['existing_images'] ?? [] as $image) {
+            /** @var ProductImage|null $row */
+            $row = $product->images()->find($image['id']);
+
+            if (!$row) {
+                continue;
+            }
+
+            $isPrimary = ($image['is_primary'] ?? false) && !$primaryAssigned;
+            $primaryAssigned = $primaryAssigned || $isPrimary;
+
+            $row->update([
+                'color_id' => $image['color_id'] ?? null,
+                'is_primary' => $isPrimary,
+                'sort_order' => $image['sort_order'] ?? 0,
+            ]);
+
+            $keepIds[] = $row->id;
+        }
+
+        $removedImages = $product->images()->whereNotIn('id', $keepIds)->get();
+        foreach ($removedImages as $removedImage) {
+            Storage::disk('public')->delete($removedImage->path);
+        }
+        $product->images()->whereNotIn('id', $keepIds)->delete();
+
+        foreach ($data['new_images'] ?? [] as $image) {
+            if (empty($image['file'])) {
+                continue;
+            }
+
+            $isPrimary = ($image['is_primary'] ?? false) && !$primaryAssigned;
+            $primaryAssigned = $primaryAssigned || $isPrimary;
+
+            $product->images()->create([
+                'color_id' => $image['color_id'] ?? null,
+                'path' => $image['file']->store('products', 'public'),
+                'sort_order' => $image['sort_order'] ?? 0,
+                'is_primary' => $isPrimary,
+            ]);
+        }
     }
 }

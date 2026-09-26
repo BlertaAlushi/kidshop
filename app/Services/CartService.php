@@ -1,60 +1,65 @@
 <?php
 
 namespace App\Services;
-use App\Models\CartProduct;
-use App\Models\Product;
+
+use App\Models\Cart;
+use App\Models\CartItem;
 use App\Resources\CartResource;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 
 class CartService
 {
+    public function currentCart(): Cart
+    {
+        return Cart::firstOrCreate(['session_id' => Session::getId()]);
+    }
+
+    protected function findCart(): ?Cart
+    {
+        return Cart::where('session_id', Session::getId())->first();
+    }
+
     public static function cartProductCount(){
-        if(empty(Auth::user())){
-            return 0;
-        }
-       return Auth::user()->cartProducts()->sum('quantity');
+        return (int) ((new static())->findCart()?->items()->sum('quantity') ?? 0);
     }
 
     public static function cartTotal(){
-        if(empty(Auth::user())){
+        $cart = (new static())->findCart();
+        if (!$cart) {
             return 0;
         }
-        $sum = 0;
-        Auth::user()->cartProducts()->each(function($cartProduct) use (&$sum){
-            $sum += $cartProduct->product->price * $cartProduct->quantity;
-        });
-        return $sum;
+        $items = $cart->items()->with('productVariant')->get();
+        return $items->sum(fn($item) => $item->quantity * $item->productVariant->price);
     }
 
     public function index(){
+        $items = $this->currentCart()
+            ->items()
+            ->with(['productVariant.product.images', 'productVariant.size', 'productVariant.color'])
+            ->get();
 
-        $cartProducts = Auth::user()->cartProducts()->with('product.translation')->get();
-        return CartResource::collection($cartProducts);
-
+        return CartResource::collection($items);
     }
 
     public function addToCart($data)
     {
-        $cartProduct = CartProduct::where('product_id', $data['product_id'])
-            ->where('user_id', Auth::id())
-            ->first();
+        $cart = $this->currentCart();
 
-        if ($cartProduct) {
-            $cartProduct->increment('quantity', $data['quantity']);
+        $item = $cart->items()->where('product_variant_id', $data['product_variant_id'])->first();
+
+        if ($item) {
+            $item->increment('quantity', $data['quantity']);
         } else {
-            CartProduct::create([
-                'product_id' => $data['product_id'],
-                'user_id'    => Auth::id(),
-                'quantity'   => $data['quantity'],
+            $cart->items()->create([
+                'product_variant_id' => $data['product_variant_id'],
+                'quantity' => $data['quantity'],
             ]);
         }
     }
 
-    public function updateCart($data,$cartProduct){
-        $cartProduct->update([
+    public function updateCart($data, CartItem $cartItem){
+        $cartItem->update([
             'quantity' => $data['quantity'],
         ]);
     }
-
-
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mark } from '@/types';
@@ -11,6 +12,7 @@ const { t } = useI18n();
 interface FormData {
     slug?: string;
     name: string;
+    is_active: boolean;
 }
 
 const props = defineProps<{
@@ -23,6 +25,7 @@ const isEdit = !!props.item?.id;
 const form = useForm<FormData>({
     slug: props.item?.slug ?? '',
     name: props.item?.name ?? '',
+    is_active: props.item?.is_active ?? true,
 });
 
 const submit = () => {
@@ -63,6 +66,20 @@ const submit = () => {
                 <Input v-model="form.slug" type="text" disabled />
                 <p v-if="form.errors.slug" class="text-sm text-red-500">
                     {{ form.errors.slug }}
+                </p>
+            </div>
+
+            <div class="grid w-full max-w-sm items-center gap-1.5">
+                <Label for="is_active" class="flex items-center space-x-3">
+                    <Checkbox
+                        id="is_active"
+                        :model-value="form.is_active"
+                        @update:model-value="form.is_active = $event === true"
+                    />
+                    <span>{{ t('admin.is_active') }}</span>
+                </Label>
+                <p v-if="form.errors.is_active" class="text-sm text-red-500">
+                    {{ form.errors.is_active }}
                 </p>
             </div>
 

@@ -4,13 +4,10 @@ namespace App\Http\Controllers\Collections;
 
 use App\Http\Controllers\Controller;
 use App\Interfaces\Services\ProductsCollectionInterface;
-use App\Models\BodyPart;
-use App\Models\Extra;
-use App\Models\Mark;
+use App\Models\Brand;
+use App\Models\Category;
 use App\Models\Product;
-use App\Models\ProductType;
-use App\Models\SkinConcern;
-use App\Models\SkinType;
+use App\Models\Season;
 use App\Resources\Products\ProductResource;
 use App\Services\FilterOptionsService;
 use Illuminate\Http\Request;
@@ -31,20 +28,9 @@ class ProductsController extends Controller
         ]);
     }
 
-    public function filterByBodyPart(Request $request, BodyPart $bodyPart){
+    public function filterByCategory(Request $request, Category $category){
         $filters = FilterOptionsService::filters($request);
-        $filters["body_parts"]= [$bodyPart->id];
-        $products = $this->productsCollection->products($filters);
-        unset($filters["body_parts"]);
-        return Inertia::render('Collections', [
-            'filters' => $filters,
-            'products' => $products,
-        ]);
-    }
-
-    public function filterBySkinType(Request $request, SkinType $skinType){
-        $filters = FilterOptionsService::filters($request);
-        $filters["skin_types"][] = $skinType->id;
+        $filters['categories'] = [$category->id];
         $products = $this->productsCollection->products($filters);
         return Inertia::render('Collections', [
             'filters' => $filters,
@@ -52,9 +38,9 @@ class ProductsController extends Controller
         ]);
     }
 
-    public function filterBySkinConcern(Request $request, SkinConcern $skinConcern){
+    public function filterByMark(Request $request, Brand $mark){
         $filters = FilterOptionsService::filters($request);
-        $filters["skin_concerns"][] = $skinConcern->id;
+        $filters['brands'] = [$mark->id];
         $products = $this->productsCollection->products($filters);
         return Inertia::render('Collections', [
             'filters' => $filters,
@@ -62,9 +48,9 @@ class ProductsController extends Controller
         ]);
     }
 
-    public function filterByProductType(Request $request, ProductType $productType){
+    public function filterBySeason(Request $request, Season $season){
         $filters = FilterOptionsService::filters($request);
-        $filters["product_types"][] = $productType->id;
+        $filters['seasons'] = [$season->id];
         $products = $this->productsCollection->products($filters);
         return Inertia::render('Collections', [
             'filters' => $filters,
@@ -72,21 +58,10 @@ class ProductsController extends Controller
         ]);
     }
 
-    public function filterByExtra(Request $request, Extra $extra){
+    public function filterByGender(Request $request, string $gender){
         $filters = FilterOptionsService::filters($request);
-        $filters["extras"][] = $extra->id;
+        $filters['gender'] = $gender;
         $products = $this->productsCollection->products($filters);
-        return Inertia::render('Collections', [
-            'filters' => $filters,
-            'products' => $products,
-        ]);
-    }
-
-    public function filterByMark(Request $request, Mark $mark){
-        $filters = FilterOptionsService::filters($request);
-        $filters["marks"] = [$mark->id];
-        $products = $this->productsCollection->products($filters);
-        unset($filters["marks"]);
         return Inertia::render('Collections', [
             'filters' => $filters,
             'products' => $products,
@@ -94,10 +69,7 @@ class ProductsController extends Controller
     }
 
     public function product(Product $product){
-        $product->load([
-            'translation:product_id,language_id,name,description',
-            'mark'
-        ]);
+        $product->load(['category', 'brand', 'images', 'variants.size', 'variants.color']);
         return Inertia::render('Product', ['product' => new ProductResource($product)]);
     }
 }

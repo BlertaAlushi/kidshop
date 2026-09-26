@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/UserLayout.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { type CartProduct as cart_product, type PageType } from '@/types';
+import { type CartProduct as cart_product, type Country, type PageType } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { route } from 'ziggy-js';
 import {
@@ -16,15 +16,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ref } from 'vue';
+import {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+} from '@/components/ui/select';
+import { computed, ref } from 'vue';
 import axios from 'axios';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CheckCircle, AlertCircleIcon } from 'lucide-vue-next';
 
 const { t } = useI18n();
 
-defineProps<{
-    cartProducts: { data: cart_product[] };
+const props = defineProps<{
+    cartItems: { data: cart_product[] };
+    countries: Country[];
 }>();
 
 const page = usePage<PageType>();
@@ -40,14 +48,24 @@ interface Address {
 }
 
 const form = useForm<Address>({
-    name: page.props.auth.user.name,
-    email: page.props.auth.user.email,
+    name: page.props.auth.user?.name ?? '',
+    email: page.props.auth.user?.email ?? '',
     phone: '',
     address: '',
     zip: '',
     city: '',
     country: '',
 });
+const deliveryFee = computed(() => {
+    const country = props.countries.find(
+        (country) => country.iso_2 === form.country,
+    );
+    return country ? Number(country.delivery_fee) : 0;
+});
+const orderTotal = computed(
+    () => page.props.cartTotalPrice + deliveryFee.value,
+);
+
 const success = ref(false);
 const errorMessage = ref<string | null>(null);
 const order = async () => {
@@ -67,7 +85,7 @@ const order = async () => {
                 const k = key as keyof Address;
                 form.errors[k] = validationErrors[key][0];
             }
-            errorMessage.value = 'Please fix the highlighted errors.';
+            errorMessage.value = 'Ju lutemi, korrigjoni gabimet e theksuara.';
         } else {
             errorMessage.value = error.message || 'Something went wrong.';
         }
@@ -108,14 +126,14 @@ const order = async () => {
                         </Alert>
                         <ItemGroup class="gap-4">
                             <Item
-                                v-for="product in cartProducts.data"
+                                v-for="product in cartItems.data"
                                 :key="product.id"
                                 asChild
                                 role="listitem"
                                 variant="outline"
                             >
                                 <span>
-                                    <ItemMedia variant="image">
+                                    <ItemMedia v-if="product.image" variant="image">
                                         <img
                                             :src="product.image"
                                             :alt="product.name"
@@ -131,8 +149,7 @@ const order = async () => {
                                         </ItemTitle>
                                         <ItemDescription>
                                             {{ product.quantity }}x
-                                            {{ product.price }}
-                                            {{ product.currency }}
+                                            {{ product.price }} €
                                         </ItemDescription>
                                     </ItemContent>
 
@@ -143,8 +160,42 @@ const order = async () => {
                                                     product.quantity *
                                                     product.price
                                                 ).toFixed(2)
+                                            }} €
+                                        </ItemTitle>
+                                    </ItemContent>
+                                </span>
+                            </Item>
+
+                            <Item asChild role="listitem">
+                                <span>
+                                    <ItemContent>
+                                        <ItemTitle>
+                                            {{ t('home.subtotal') }}
+                                        </ItemTitle>
+                                    </ItemContent>
+                                    <ItemContent>
+                                        <ItemTitle>
+                                            {{
+                                                page.props.cartTotalPrice.toFixed(
+                                                    2,
+                                                )
                                             }}
-                                            {{ product.currency }}
+                                            €
+                                        </ItemTitle>
+                                    </ItemContent>
+                                </span>
+                            </Item>
+
+                            <Item asChild role="listitem">
+                                <span>
+                                    <ItemContent>
+                                        <ItemTitle>
+                                            {{ t('home.delivery_fee') }}
+                                        </ItemTitle>
+                                    </ItemContent>
+                                    <ItemContent>
+                                        <ItemTitle>
+                                            {{ deliveryFee.toFixed(2) }} €
                                         </ItemTitle>
                                     </ItemContent>
                                 </span>
@@ -154,17 +205,12 @@ const order = async () => {
                                 <span>
                                     <ItemContent>
                                         <ItemTitle class="text-lg font-bold">
-                                            Total
+                                            {{ t('home.total') }}
                                         </ItemTitle>
                                     </ItemContent>
                                     <ItemContent>
                                         <ItemTitle class="text-lg font-bold">
-                                            {{
-                                                page.props.cartTotalPrice.toFixed(
-                                                    2,
-                                                )
-                                            }}
-                                            €
+                                            {{ orderTotal.toFixed(2) }} €
                                         </ItemTitle>
                                     </ItemContent>
                                 </span>
@@ -253,7 +299,22 @@ const order = async () => {
                                     <Label>{{
                                         t('home.address.country')
                                     }}</Label>
-                                    <Input v-model="form.country" type="text" />
+                                    <Select v-model="form.country">
+                                        <SelectTrigger class="w-full">
+                                            <SelectValue
+                                                :placeholder="t('home.address.country')"
+                                            />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem
+                                                v-for="country in countries"
+                                                :key="country.iso_2"
+                                                :value="country.iso_2"
+                                            >
+                                                {{ country.country }}
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                     <p
                                         v-if="form.errors.country"
                                         class="text-sm text-red-500"

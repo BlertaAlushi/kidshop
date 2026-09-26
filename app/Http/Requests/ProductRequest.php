@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ProductRequest extends FormRequest
 {
@@ -21,39 +22,46 @@ class ProductRequest extends FormRequest
      */
     public function rules(): array
     {
+        $productId = $this->route('product')?->id;
+
         return [
-            'slug' => [
-                'nullable',
-            ],
+            'category_id' => 'required|exists:categories,id',
+            'brand_id' => 'required|exists:brands,id',
 
             'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'stock_quantity' => 'required|integer',
-            'price' => 'required|numeric',
-            'currency' => 'required|string|max:10',
-            'mark_id' => 'required|exists:marks,id',
+            'slug' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('products', 'slug')->ignore($productId),
+            ],
+            'description' => 'nullable|string',
+            'gender' => 'required|in:boy,girl,unisex',
+            'is_active' => 'nullable|boolean',
 
-            'image' => 'nullable|file|image|mimes:jpeg,png,jpg|max:2048',
+            'seasons' => 'nullable|array',
+            'seasons.*' => 'exists:seasons,id',
 
-            'translations' => 'required|array',
-            'translations.*.language_id' => 'required|exists:languages,id',
-            'translations.*.name' => 'required|string',
-            'translations.*.description' => 'required|string',
+            'variants' => 'required|array|min:1',
+            'variants.*.id' => 'nullable|integer|exists:product_variants,id',
+            'variants.*.size_id' => 'required|exists:sizes,id',
+            'variants.*.color_id' => 'required|exists:colors,id',
+            'variants.*.sku' => 'required|string|max:255',
+            'variants.*.price' => 'required|numeric|min:0',
+            'variants.*.stock_quantity' => 'required|integer|min:0',
+            'variants.*.is_active' => 'nullable|boolean',
 
-            'body_parts' => 'nullable|array',
-            'body_parts.*' => 'exists:body_parts,id',
+            'existing_images' => 'nullable|array',
+            'existing_images.*.id' => 'required|integer|exists:product_images,id',
+            'existing_images.*.color_id' => 'nullable|exists:colors,id',
+            'existing_images.*.is_primary' => 'nullable|boolean',
+            'existing_images.*.sort_order' => 'nullable|integer|min:0',
 
-            'skin_types' => 'nullable|array',
-            'skin_types.*' => 'exists:skin_types,id',
-
-            'skin_concerns' => 'nullable|array',
-            'skin_concerns.*' => 'exists:skin_concerns,id',
-
-            'product_types' => 'nullable|array',
-            'product_types.*' => 'exists:product_types,id',
-
-            'extras' => 'nullable|array',
-            'extras.*' => 'exists:extras,id',
+            'new_images' => 'nullable|array',
+            'new_images.*.file' => 'required|file|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'new_images.*.color_id' => 'nullable|exists:colors,id',
+            'new_images.*.is_primary' => 'nullable|boolean',
+            'new_images.*.sort_order' => 'nullable|integer|min:0',
         ];
     }
 }

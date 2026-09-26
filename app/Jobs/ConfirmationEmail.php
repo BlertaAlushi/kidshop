@@ -26,7 +26,12 @@ class ConfirmationEmail implements ShouldQueue
      */
     public function handle(): void
     {
-        $order = $this->order->load(['address', 'products.product']);
-        Mail::to($order->address->email)->send(new ConfirmationMail($order));
+        $order = $this->order->load(['addresses', 'items']);
+
+        if (!$order->customer_email) {
+            return;
+        }
+
+        Mail::to($order->customer_email)->send(new ConfirmationMail($order));
     }
 }

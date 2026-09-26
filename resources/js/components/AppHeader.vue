@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { usePage } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 import { useI18n } from 'vue-i18n';
-import { Globe, ShoppingBag } from 'lucide-vue-next';
+import { ShoppingBag } from 'lucide-vue-next';
 import { MenuItem } from '@/types';
 import {
     DropdownMenu,
@@ -41,12 +41,6 @@ import { computed } from 'vue';
 
 const page = usePage<PageType>();
 
-function changeLanguage(code: string) {
-    const segments = window.location.pathname.split('/').filter(Boolean);
-    segments[0] = code;
-    window.location.href = '/' + segments.join('/') + window.location.search;
-}
-
 const { t } = useI18n();
 
 const menufilters = computed(() => page.props.menu);
@@ -59,40 +53,38 @@ interface MenuInterface {
     items: MenuItem[];
 }
 
-const menu: MenuInterface[] = [
+const genderItems: MenuItem[] = [
+    { id: -1, slug: 'boy', name: t('home.boy') },
+    { id: -2, slug: 'girl', name: t('home.girl') },
+    { id: -3, slug: 'unisex', name: t('home.unisex') },
+];
+
+const menu = computed<MenuInterface[]>(() => [
     {
-        key: 'body_parts',
-        title: t('home.products'),
-        url: 'collection.types',
-        items: menufilters.value.bodyParts.data,
-    },
-    {
-        key: 'skin_types',
-        title: t('home.skin_types'),
-        url: 'collection.skin.types',
-        items: menufilters.value.skinTypes.data,
-    },
-    {
-        key: 'skin_concerns',
-        title: t('home.skin_concerns'),
-        url: 'collection.skin.concerns',
-        items: menufilters.value.skinConcerns.data,
-    },
-    {
-        key: 'product_types',
-        title: t('home.product_types'),
-        url: 'collection.product.types',
-        items: menufilters.value.productTypes.data,
+        key: 'categories',
+        title: t('home.categories'),
+        url: 'collection.category',
+        items: menufilters.value.categories.data,
     },
     {
         key: 'marks',
         title: t('home.marks'),
         url: 'collection.marks',
-        items: menufilters.value.marks.data,
+        items: menufilters.value.brands.data,
     },
-];
-
-const languages = computed(() => page.props.languages);
+    {
+        key: 'seasons',
+        title: t('home.seasons'),
+        url: 'collection.season',
+        items: menufilters.value.seasons.data,
+    },
+    {
+        key: 'gender',
+        title: t('home.gender'),
+        url: 'collection.gender',
+        items: genderItems,
+    },
+]);
 
 const auth = computed(() => page.props.auth);
 
@@ -292,34 +284,6 @@ const mainNavItems: NavItem[] = [
                         >
                             <component :is="UserRound" class="h-5 w-5" />
                         </Link>
-
-                        <DropdownMenu>
-                            <DropdownMenuTrigger :as-child="true">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    class="relative size-10 w-auto cursor-pointer px-3"
-                                >
-                                    <Globe />
-                                </Button>
-                            </DropdownMenuTrigger>
-
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                    :as-child="true"
-                                    v-for="lang in languages"
-                                    :key="lang.code"
-                                >
-                                    <Button
-                                        variant="ghost"
-                                        class="relative w-full cursor-pointer justify-start px-3"
-                                        @click="changeLanguage(lang.code)"
-                                    >
-                                        {{ lang.language }}
-                                    </Button>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
                     </div>
                 </div>
             </div>

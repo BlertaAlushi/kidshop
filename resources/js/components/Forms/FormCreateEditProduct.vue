@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { useForm, usePage } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { useForm } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useI18n } from 'vue-i18n';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
     Select,
     SelectTrigger,
@@ -13,66 +16,150 @@ import {
     SelectContent,
     SelectItem,
 } from '@/components/ui/select';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { PageType, ProductForm } from '@/types';
-import { Label } from '@/components/ui/label';
-import { useI18n } from 'vue-i18n';
+import { Trash } from 'lucide-vue-next';
+import {
+    AdminProduct,
+    Brand,
+    Category,
+    Color,
+    Season,
+    Size,
+} from '@/types';
 
 const { t } = useI18n();
 
-const page = usePage<PageType>();
+interface VariantForm {
+    id?: number;
+    size_id: number | null;
+    color_id: number | null;
+    sku: string;
+    price: number;
+    stock_quantity: number;
+    is_active: boolean;
+}
 
-const languages = computed(() => page.props.languages ?? []);
-const filters = computed(() => page.props.menu ?? []);
+interface ExistingImageForm {
+    id: number;
+    path: string;
+    color_id: number | null;
+    is_primary: boolean;
+    sort_order: number;
+}
+
+interface NewImageForm {
+    file: File | null;
+    preview: string | null;
+    color_id: number | null;
+    is_primary: boolean;
+    sort_order: number;
+}
+
+interface ProductFormData {
+    category_id: number | null;
+    brand_id: number | null;
+    name: string;
+    slug: string;
+    description: string;
+    gender: 'boy' | 'girl' | 'unisex';
+    is_active: boolean;
+    seasons: number[];
+    variants: VariantForm[];
+    existing_images: ExistingImageForm[];
+    new_images: NewImageForm[];
+}
 
 const props = defineProps<{
-    product?: ProductForm;
+    product?: AdminProduct;
+    categories: Category[];
+    brands: Brand[];
+    sizes: Size[];
+    colors: Color[];
+    seasons: Season[];
 }>();
 
 const isEdit = !!props.product?.id;
 
-const imagePreview = ref(props.product?.image || null);
-
-const form = useForm<ProductForm>({
-    name: props.product?.name || '',
-    slug: props.product?.slug || '',
-    description: props.product?.description || '',
-
-    price: props.product?.price || 0,
-    currency: props.product?.currency || 'EUR',
-    stock_quantity: props.product?.stock_quantity || 0,
-    mark_id: props.product?.mark_id || null,
-    image: null,
-
-    translations: languages.value.map((lang) => {
-        const existing = props.product?.translations?.find(
-            (t: any) => t.language_id === lang.id,
-        );
-
-        return {
-            language_id: lang.id,
-            name: existing?.name || '',
-            description: existing?.description || '',
-        };
-    }),
-
-    body_parts: props.product?.body_parts?.map((i: any) => i.id) || [],
-    product_types: props.product?.product_types?.map((i: any) => i.id) || [],
-    skin_types: props.product?.skin_types?.map((i: any) => i.id) || [],
-    skin_concerns: props.product?.skin_concerns?.map((i: any) => i.id) || [],
-    extras: props.product?.extras?.map((i: any) => i.id) || [],
+const emptyVariant = (): VariantForm => ({
+    size_id: null,
+    color_id: null,
+    sku: '',
+    price: 0,
+    stock_quantity: 0,
+    is_active: true,
 });
 
-const handleImage = (e: any) => {
-    const file = e.target.files[0];
-    form.image = file;
-    imagePreview.value = URL.createObjectURL(file);
+const emptyNewImage = (): NewImageForm => ({
+    file: null,
+    preview: null,
+    color_id: null,
+    is_primary: false,
+    sort_order: 0,
+});
+
+const form = useForm<ProductFormData>({
+    category_id: props.product?.category_id ?? null,
+    brand_id: props.product?.brand_id ?? null,
+    name: props.product?.name ?? '',
+    slug: props.product?.slug ?? '',
+    description: props.product?.description ?? '',
+    gender: props.product?.gender ?? 'unisex',
+    is_active: props.product?.is_active ?? true,
+
+    seasons: props.product?.seasons?.map((season) => season.id) ?? [],
+
+    variants: props.product?.variants?.length
+        ? props.product.variants.map((variant) => ({
+              id: variant.id,
+              size_id: variant.size_id,
+              color_id: variant.color_id,
+              sku: variant.sku,
+              price: variant.price,
+              stock_quantity: variant.stock_quantity,
+              is_active: variant.is_active,
+          }))
+        : [emptyVariant()],
+
+    existing_images: props.product?.images?.map((image) => ({
+        id: image.id,
+        path: image.path,
+        color_id: image.color_id,
+        is_primary: image.is_primary,
+        sort_order: image.sort_order,
+    })) ?? [],
+
+    new_images: [],
+});
+
+const addVariant = () => form.variants.push(emptyVariant());
+const removeVariant = (index: number) => form.variants.splice(index, 1);
+
+const removeExistingImage = (index: number) => form.existing_images.splice(index, 1);
+
+const setExistingPrimary = (index: number) => {
+    form.existing_images.forEach((image, i) => (image.is_primary = i === index));
+    form.new_images.forEach((image) => (image.is_primary = false));
 };
+
+const setNewPrimary = (index: number) => {
+    form.new_images.forEach((image, i) => (image.is_primary = i === index));
+    form.existing_images.forEach((image) => (image.is_primary = false));
+};
+
+const addImageRow = () => form.new_images.push(emptyNewImage());
+const removeNewImage = (index: number) => form.new_images.splice(index, 1);
+
+const handleFile = (index: number, event: Event) => {
+    const file = (event.target as HTMLInputElement).files?.[0] ?? null;
+    form.new_images[index].file = file;
+    form.new_images[index].preview = file ? URL.createObjectURL(file) : null;
+};
+
+const storageUrl = (path: string) => `/storage/${path}`;
 
 const submit = () => {
     form.post(
         isEdit
-            ? route('admin.products.update', props.product.id)
+            ? route('admin.products.update', props.product!.id)
             : route('admin.products.store'),
         { forceFormData: true },
     );
@@ -80,15 +167,12 @@ const submit = () => {
 </script>
 
 <template>
-    <form
-        @submit.prevent="submit"
-        class="mx-auto grid w-full grid-cols-3 gap-6 p-10"
-    >
+    <form @submit.prevent="submit" class="mx-auto grid w-full grid-cols-3 gap-6 p-10">
         <!-- LEFT SIDE -->
         <div class="col-span-2 space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle> {{ t('admin.product') }} </CardTitle>
+                    <CardTitle>{{ t('admin.product') }}</CardTitle>
                 </CardHeader>
                 <CardContent class="grid grid-cols-2 gap-4">
                     <div class="grid w-full max-w-sm items-center gap-1.5">
@@ -99,25 +183,7 @@ const submit = () => {
                         </p>
                     </div>
 
-                    <div class="grid w-full max-w-sm items-center gap-1.5">
-                        <Label>{{ t('admin.default_description') }}</Label>
-                        <Textarea
-                            v-model="form.description"
-                            class="min-h-30"
-                            placeholder="Description"
-                        />
-                        <p
-                            v-if="form.errors.description"
-                            class="text-sm text-red-500"
-                        >
-                            {{ form.errors.description }}
-                        </p>
-                    </div>
-
-                    <div
-                        v-if="product?.id"
-                        class="grid w-full max-w-sm items-center gap-1.5"
-                    >
+                    <div v-if="isEdit" class="grid w-full max-w-sm items-center gap-1.5">
                         <Label>{{ t('admin.slug') }}</Label>
                         <Input v-model="form.slug" type="text" disabled />
                         <p v-if="form.errors.slug" class="text-sm text-red-500">
@@ -125,287 +191,292 @@ const submit = () => {
                         </p>
                     </div>
 
-                    <div class="grid w-full max-w-sm items-center gap-1.5">
-                        <Label>{{ t('admin.stock_quantity') }}</Label>
-                        <Input v-model="form.stock_quantity" type="number" />
-                        <p
-                            v-if="form.errors.stock_quantity"
-                            class="text-sm text-red-500"
-                        >
-                            {{ form.errors.stock_quantity }}
+                    <div class="col-span-2 grid w-full items-center gap-1.5">
+                        <Label>{{ t('admin.default_description') }}</Label>
+                        <Textarea
+                            v-model="form.description"
+                            class="min-h-30"
+                            :placeholder="t('admin.description')"
+                        />
+                        <p v-if="form.errors.description" class="text-sm text-red-500">
+                            {{ form.errors.description }}
                         </p>
                     </div>
 
                     <div class="grid w-full max-w-sm items-center gap-1.5">
-                        <Label>{{ t('admin.price') }}</Label>
-                        <Input v-model="form.price" type="number" />
-                        <p
-                            v-if="form.errors.price"
-                            class="text-sm text-red-500"
-                        >
-                            {{ form.errors.price }}
+                        <Label>{{ t('admin.category') }}</Label>
+                        <Select v-model="form.category_id">
+                            <SelectTrigger>
+                                <SelectValue :placeholder="t('admin.select') + ' ' + t('admin.category')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem v-for="category in categories" :key="category.id" :value="category.id">
+                                    {{ category.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p v-if="form.errors.category_id" class="text-sm text-red-500">
+                            {{ form.errors.category_id }}
                         </p>
                     </div>
 
                     <div class="grid w-full max-w-sm items-center gap-1.5">
-                        <Label>{{ t('admin.currency') }}</Label>
-                        <Input v-model="form.currency" type="text" />
-                        <p
-                            v-if="form.errors.currency"
-                            class="text-sm text-red-500"
-                        >
-                            {{ form.errors.currency }}
+                        <Label>{{ t('home.brand') }}</Label>
+                        <Select v-model="form.brand_id">
+                            <SelectTrigger>
+                                <SelectValue :placeholder="t('admin.select') + ' ' + t('home.brand')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem v-for="brand in brands" :key="brand.id" :value="brand.id">
+                                    {{ brand.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p v-if="form.errors.brand_id" class="text-sm text-red-500">
+                            {{ form.errors.brand_id }}
                         </p>
+                    </div>
+
+                    <div class="grid w-full max-w-sm items-center gap-1.5">
+                        <Label>{{ t('admin.gender') }}</Label>
+                        <Select v-model="form.gender">
+                            <SelectTrigger>
+                                <SelectValue :placeholder="t('admin.gender')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="unisex">{{ t('admin.unisex') }}</SelectItem>
+                                <SelectItem value="boy">{{ t('admin.boy') }}</SelectItem>
+                                <SelectItem value="girl">{{ t('admin.girl') }}</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <p v-if="form.errors.gender" class="text-sm text-red-500">
+                            {{ form.errors.gender }}
+                        </p>
+                    </div>
+
+                    <div class="grid w-full max-w-sm items-center gap-1.5">
+                        <Label>{{ t('home.seasons') }}</Label>
+                        <Select v-model="form.seasons" multiple>
+                            <SelectTrigger>
+                                <SelectValue :placeholder="t('admin.select') + ' ' + t('home.seasons')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem v-for="season in seasons" :key="season.id" :value="season.id">
+                                    {{ season.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div class="grid w-full max-w-sm items-center gap-1.5">
+                        <Label for="is_active" class="flex items-center gap-3">
+                            <Switch
+                                id="is_active"
+                                :model-value="form.is_active"
+                                @update:model-value="form.is_active = $event"
+                            />
+                            <span>{{ t('admin.is_active') }}</span>
+                        </Label>
                     </div>
                 </CardContent>
             </Card>
+
+            <!-- Variants -->
             <Card>
                 <CardHeader>
-                    <CardTitle>{{ t('admin.translations') }}</CardTitle>
+                    <CardTitle>{{ t('admin.variants') }}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <Tabs default-value="0">
-                        <TabsList>
-                            <TabsTrigger
-                                v-for="(lang, index) in languages"
-                                :key="lang.id"
-                                :value="index.toString()"
-                            >
-                                {{ lang.code.toUpperCase() }}
-                            </TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent
-                            v-for="(lang, index) in languages"
-                            :key="lang.id"
-                            :value="index.toString()"
-                            class="mt-4 space-y-4"
-                        >
-                            <Input
-                                v-model="form.translations[index].name"
-                                :placeholder="t('admin.name')"
-                            />
-                            <p
-                                v-if="form.errors[`translations.${index}.name`]"
-                                class="text-sm text-red-500"
-                            >
-                                {{ form.errors[`translations.${index}.name`] }}
+                <CardContent class="space-y-4">
+                    <div
+                        v-for="(variant, index) in form.variants"
+                        :key="index"
+                        class="grid grid-cols-6 items-end gap-3 border-b pb-4 last:border-b-0"
+                    >
+                        <div class="grid gap-1.5">
+                            <Label>{{ t('home.sizes') }}</Label>
+                            <Select v-model="variant.size_id">
+                                <SelectTrigger>
+                                    <SelectValue :placeholder="t('admin.select')" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem v-for="size in sizes" :key="size.id" :value="size.id">
+                                        {{ size.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p v-if="form.errors[`variants.${index}.size_id`]" class="text-sm text-red-500">
+                                {{ form.errors[`variants.${index}.size_id`] }}
                             </p>
+                        </div>
 
-                            <Textarea
-                                v-model="form.translations[index].description"
-                                class="min-h-30"
-                                :placeholder="t('admin.description')"
-                            />
-                            <p
-                                v-if="
-                                    form.errors[
-                                        `translations.${index}.description`
-                                    ]
-                                "
-                                class="text-sm text-red-500"
-                            >
-                                {{
-                                    form.errors[
-                                        `translations.${index}.description`
-                                    ]
-                                }}
+                        <div class="grid gap-1.5">
+                            <Label>{{ t('home.colors') }}</Label>
+                            <Select v-model="variant.color_id">
+                                <SelectTrigger>
+                                    <SelectValue :placeholder="t('admin.select')" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem v-for="color in colors" :key="color.id" :value="color.id">
+                                        {{ color.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p v-if="form.errors[`variants.${index}.color_id`]" class="text-sm text-red-500">
+                                {{ form.errors[`variants.${index}.color_id`] }}
                             </p>
-                        </TabsContent>
-                    </Tabs>
-                </CardContent>
-            </Card>
+                        </div>
 
-            <!-- Relations -->
-            <Card>
-                <CardHeader>
-                    <CardTitle>{{ t('admin.relations') }}</CardTitle>
-                </CardHeader>
-                <CardContent class="grid grid-cols-2 gap-4">
-                    <!-- Body Parts -->
-                    <div class="grid w-full max-w-sm items-center gap-1.5">
-                        <Label>{{ t('home.body_parts') }}</Label>
-                        <Select v-model="form.body_parts" multiple>
-                            <SelectTrigger>
-                                <SelectValue
-                                    :placeholder="
-                                        t('admin.select') +
-                                        ' ' +
-                                        t('home.body_parts')
-                                    "
+                        <div class="grid gap-1.5">
+                            <Label>{{ t('admin.sku') }}</Label>
+                            <Input v-model="variant.sku" type="text" />
+                            <p v-if="form.errors[`variants.${index}.sku`]" class="text-sm text-red-500">
+                                {{ form.errors[`variants.${index}.sku`] }}
+                            </p>
+                        </div>
+
+                        <div class="grid gap-1.5">
+                            <Label>{{ t('admin.price') }}</Label>
+                            <Input v-model.number="variant.price" type="number" min="0" step="0.01" />
+                            <p v-if="form.errors[`variants.${index}.price`]" class="text-sm text-red-500">
+                                {{ form.errors[`variants.${index}.price`] }}
+                            </p>
+                        </div>
+
+                        <div class="grid gap-1.5">
+                            <Label>{{ t('admin.stock_quantity') }}</Label>
+                            <Input v-model.number="variant.stock_quantity" type="number" min="0" />
+                            <p v-if="form.errors[`variants.${index}.stock_quantity`]" class="text-sm text-red-500">
+                                {{ form.errors[`variants.${index}.stock_quantity`] }}
+                            </p>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-2">
+                            <Label class="flex items-center gap-2">
+                                <Switch
+                                    :model-value="variant.is_active"
+                                    @update:model-value="variant.is_active = $event"
                                 />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem
-                                    v-for="item in filters.bodyParts.data"
-                                    :key="item.id"
-                                    :value="item.id"
-                                >
-                                    {{ item.name }}
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
+                                <span class="text-xs">{{ t('admin.is_active') }}</span>
+                            </Label>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                class="cursor-pointer"
+                                :disabled="form.variants.length === 1"
+                                @click="removeVariant(index)"
+                            >
+                                <Trash class="size-4" />
+                            </Button>
+                        </div>
                     </div>
 
-                    <!-- Product Types -->
-                    <div class="grid w-full max-w-sm items-center gap-1.5">
-                        <Label>{{ t('home.product_types') }}</Label>
-                        <Select v-model="form.product_types" multiple>
-                            <SelectTrigger>
-                                <SelectValue
-                                    :placeholder="
-                                        t('admin.select') +
-                                        ' ' +
-                                        t('home.product_types')
-                                    "
-                                />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem
-                                    v-for="item in filters.productTypes.data"
-                                    :key="item.id"
-                                    :value="item.id"
-                                >
-                                    {{ item.name }}
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    <p v-if="form.errors.variants" class="text-sm text-red-500">
+                        {{ form.errors.variants }}
+                    </p>
 
-                    <!-- Skin Types -->
-                    <div class="grid w-full max-w-sm items-center gap-1.5">
-                        <Label>{{ t('home.skin_types') }}</Label>
-                        <Select v-model="form.skin_types" multiple>
-                            <SelectTrigger>
-                                <SelectValue
-                                    :placeholder="
-                                        t('admin.select') +
-                                        ' ' +
-                                        t('home.skin_types')
-                                    "
-                                />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem
-                                    v-for="item in filters.skinTypes.data"
-                                    :key="item.id"
-                                    :value="item.id"
-                                >
-                                    {{ item.name }}
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <!-- Skin Concerns -->
-                    <div class="grid w-full max-w-sm items-center gap-1.5">
-                        <Label>{{ t('home.skin_concerns') }}</Label>
-                        <Select v-model="form.skin_concerns" multiple>
-                            <SelectTrigger>
-                                <SelectValue
-                                    :placeholder="
-                                        t('admin.select') +
-                                        ' ' +
-                                        t('home.skin_concerns')
-                                    "
-                                />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem
-                                    v-for="item in filters.skinConcerns.data"
-                                    :key="item.id"
-                                    :value="item.id"
-                                >
-                                    {{ item.name }}
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <!-- Extras -->
-                    <div class="grid w-full max-w-sm items-center gap-1.5">
-                        <Label>{{ t('home.extra') }}</Label>
-                        <Select v-model="form.extras" multiple>
-                            <SelectTrigger>
-                                <SelectValue
-                                    :placeholder="
-                                        t('admin.select') +
-                                        ' ' +
-                                        t('home.extra')
-                                    "
-                                />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem
-                                    v-for="item in filters.extras.data"
-                                    :key="item.id"
-                                    :value="item.id"
-                                >
-                                    {{ item.name }}
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    <Button type="button" variant="outline" class="cursor-pointer" @click="addVariant">
+                        {{ t('admin.add') }} {{ t('admin.variants') }}
+                    </Button>
                 </CardContent>
             </Card>
         </div>
 
+        <!-- RIGHT SIDE -->
         <div class="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle
-                        >{{ t('admin.product') }}
-                        {{ t('admin.image') }}</CardTitle
-                    >
+                    <CardTitle>{{ t('admin.images') }}</CardTitle>
                 </CardHeader>
                 <CardContent class="space-y-4">
-                    <Input type="file" @change="handleImage" />
-                    <img
-                        v-if="imagePreview"
-                        :src="imagePreview"
-                        class="w-full rounded-lg border"
-                        alt="Product Image"
-                    />
-                    <p v-if="form.errors.image" class="text-sm text-red-500">
-                        {{ form.errors.image }}
-                    </p>
-                </CardContent>
-            </Card>
+                    <div
+                        v-for="(image, index) in form.existing_images"
+                        :key="image.id"
+                        class="space-y-2 border-b pb-4 last:border-b-0"
+                    >
+                        <img :src="storageUrl(image.path)" class="w-full rounded-lg border" alt="Product image" />
 
-            <!-- Brand -->
-            <Card>
-                <CardHeader>
-                    <CardTitle>{{ t('home.brand') }}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Select v-model="form.mark_id">
-                        <SelectTrigger>
-                            <SelectValue
-                                :placeholder="t('admin.select')+' '+ t('home.brand')"
-                            />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem
-                                v-for="mark in filters.marks.data"
-                                :key="mark.id"
-                                :value="mark.id"
+                        <Select v-model="image.color_id">
+                            <SelectTrigger>
+                                <SelectValue :placeholder="t('home.colors')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem v-for="color in colors" :key="color.id" :value="color.id">
+                                    {{ color.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <div class="flex items-center justify-between">
+                            <Label class="flex items-center gap-2">
+                                <Switch
+                                    :model-value="image.is_primary"
+                                    @update:model-value="setExistingPrimary(index)"
+                                />
+                                <span class="text-xs">{{ t('admin.primary') }}</span>
+                            </Label>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                class="cursor-pointer"
+                                @click="removeExistingImage(index)"
                             >
-                                {{ mark.name }}
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <p v-if="form.errors.mark_id" class="text-sm text-red-500">
-                        {{ form.errors.mark_id }}
-                    </p>
+                                <Trash class="size-4" />
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div
+                        v-for="(image, index) in form.new_images"
+                        :key="'new-' + index"
+                        class="space-y-2 border-b pb-4 last:border-b-0"
+                    >
+                        <Input type="file" accept="image/*" @change="handleFile(index, $event)" />
+                        <img v-if="image.preview" :src="image.preview" class="w-full rounded-lg border" alt="New product image" />
+                        <p v-if="form.errors[`new_images.${index}.file`]" class="text-sm text-red-500">
+                            {{ form.errors[`new_images.${index}.file`] }}
+                        </p>
+
+                        <Select v-model="image.color_id">
+                            <SelectTrigger>
+                                <SelectValue :placeholder="t('home.colors')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem v-for="color in colors" :key="color.id" :value="color.id">
+                                    {{ color.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+
+                        <div class="flex items-center justify-between">
+                            <Label class="flex items-center gap-2">
+                                <Switch
+                                    :model-value="image.is_primary"
+                                    @update:model-value="setNewPrimary(index)"
+                                />
+                                <span class="text-xs">{{ t('admin.primary') }}</span>
+                            </Label>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                class="cursor-pointer"
+                                @click="removeNewImage(index)"
+                            >
+                                <Trash class="size-4" />
+                            </Button>
+                        </div>
+                    </div>
+
+                    <Button type="button" variant="outline" class="w-full cursor-pointer" @click="addImageRow">
+                        {{ t('admin.add') }} {{ t('admin.image') }}
+                    </Button>
                 </CardContent>
             </Card>
 
             <div class="flex justify-end">
-                <Button
-                    @click="submit"
-                    :disabled="form.processing"
-                    class="cursor:pointer"
-                >
+                <Button @click="submit" :disabled="form.processing" class="cursor-pointer">
                     {{ isEdit ? t('admin.update') : t('admin.create') }}
                 </Button>
             </div>

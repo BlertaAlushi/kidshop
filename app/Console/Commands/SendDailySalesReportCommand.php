@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Mail\DailySalesReport;
-use App\Models\OrderProduct;
+use App\Models\OrderItem;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -31,18 +31,16 @@ class SendDailySalesReportCommand extends Command
      */
     public function handle()
     {
-        $dailySales = OrderProduct::select(
-            'products.name as name',
-            'order_products.unit_price as unit_price',
-            'products.currency as currency',
-            DB::raw('SUM(order_products.quantity) as quantity'),
-            DB::raw('SUM(order_products.quantity * order_products.unit_price) as totalprice')
+        $dailySales = OrderItem::select(
+            'order_items.product_name as name',
+            'order_items.unit_price as unit_price',
+            DB::raw('SUM(order_items.quantity) as quantity'),
+            DB::raw('SUM(order_items.total) as totalprice')
         )
-            ->join('orders', 'order_products.order_id', '=', 'orders.id')
-            ->join('products', 'order_products.product_id', '=', 'products.id')
-            ->where('orders.status', "confirmed")
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.status', 'confirmed')
             ->whereDate('orders.updated_at', Carbon::today())
-            ->groupBy('products.id', 'products.name','order_products.unit_price','products.currency')
+            ->groupBy('order_items.product_name', 'order_items.unit_price')
             ->get();
 
         $email = "admin@test.com";

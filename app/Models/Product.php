@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Services\LanguageService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,82 +12,50 @@ class Product extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
+        'category_id',
+        'brand_id',
         'name',
         'slug',
-        'image',
         'description',
-        'price',
-        'currency',
-        'stock_quantity',
-        'mark_id'
+        'gender',
+        'is_active',
     ];
 
-    public function mark(): BelongsTo
+    protected function casts(): array
     {
-        return $this->belongsTo(Mark::class);
+        return [
+            'is_active' => 'boolean',
+        ];
     }
 
-    public function translations(): HasMany
+    public function category(): BelongsTo
     {
-        return $this->hasMany(ProductLanguage::class);
+        return $this->belongsTo(Category::class);
     }
 
-    public function translation()
+    public function brand(): BelongsTo
     {
-        return $this->hasOne(ProductLanguage::class)
-            ->where('language_id', LanguageService::getCurrentLanguageId());
+        return $this->belongsTo(Brand::class);
     }
 
-    public function bodyParts(): BelongsToMany
+    public function variants(): HasMany
     {
-        return $this->belongsToMany(BodyPart::class, 'product_body_part', 'product_id', 'body_part_id');
+        return $this->hasMany(ProductVariant::class);
     }
 
-    public function productTypes(): BelongsToMany
+    public function images(): HasMany
     {
-        return $this->belongsToMany(ProductType::class, 'product_product_type', 'product_id', 'product_type_id');
+        return $this->hasMany(ProductImage::class);
     }
 
-    public function skinTypes(): BelongsToMany
+    public function seasons(): BelongsToMany
     {
-        return $this->belongsToMany(SkinType::class, 'product_skin_type', 'product_id', 'skin_type_id');
+        return $this->belongsToMany(Season::class, 'product_season');
     }
 
-    public function skinConcerns(): BelongsToMany
+    public function promotionTargets(): HasMany
     {
-        return $this->belongsToMany(SkinConcern::class, 'product_skin_concern', 'product_id', 'skin_concern_id');
-    }
-
-    public function extras(): BelongsToMany
-    {
-        return $this->belongsToMany(Extra::class, 'product_extra', 'product_id', 'extra_id');
-    }
-
-    public function orders(): BelongsToMany
-    {
-        return $this->belongsToMany(Order::class,)
-            ->using(OrderProduct::class)
-            ->withPivot('quantity','unit_price')
-            ->withTimestamps();
-    }
-
-    public function getImageAttribute($value)
-    {
-        return $value
-            ? asset('storage/' . $value)
-            : null;
-    }
-
-    public function getCurrencyAttribute($value){
-        if($value=="EUR"){
-            return "€";
-        }
-        return $value;
+        return $this->hasMany(PromotionTarget::class);
     }
 }

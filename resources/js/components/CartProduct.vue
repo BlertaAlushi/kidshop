@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, watch } from 'vue';
+import { watch } from 'vue';
 import { Trash } from 'lucide-vue-next';
 import { type CartProduct } from '@/types';
 import { router, useForm } from '@inertiajs/vue3';
@@ -18,13 +18,11 @@ const props = defineProps<{
     cart_product: CartProduct;
 }>();
 
-interface UpdateCartProduct {
-    product_id: number;
+interface UpdateCartItem {
     quantity: number;
 }
 
-const form = useForm<UpdateCartProduct>({
-    product_id: props.cart_product.product_id,
+const form = useForm<UpdateCartItem>({
     quantity: props.cart_product.quantity,
 });
 
@@ -46,21 +44,39 @@ const removeFromCart = () => {
 
 <template>
     <div class="w-2/3 flex gap-4 border-b border-gray-200 py-8 dark:border-gray-700">
-        <img
-            :src="cart_product.image"
-            :alt="cart_product.name"
-            class="h-36 w-36 object-cover md:h-36 md:w-36"
-        />
+        <a :href="route('collection.product', cart_product.product_slug)">
+            <img
+                v-if="cart_product.image"
+                :src="cart_product.image"
+                :alt="cart_product.name"
+                class="h-36 w-36 object-cover md:h-36 md:w-36"
+            />
+        </a>
 
         <div class="flex flex-1 flex-col justify-between">
             <div>
                 <h3
                     class="text-sm font-medium text-gray-900 dark:text-gray-100"
                 >
-                    {{ cart_product.name }}
+                    <a :href="route('collection.product', cart_product.product_slug)">
+                        {{ cart_product.name }}
+                    </a>
                 </h3>
+                <p
+                    v-if="cart_product.size || cart_product.color"
+                    class="flex items-center gap-1 text-xs text-gray-500"
+                >
+                    <span v-if="cart_product.size">{{ cart_product.size }}</span>
+                    <span v-if="cart_product.size && cart_product.color"> / </span>
+                    <span
+                        v-if="cart_product.color"
+                        :title="cart_product.color"
+                        :style="{ backgroundColor: cart_product.color_hex ?? undefined }"
+                        class="inline-block h-3 w-3 rounded-sm border border-gray-300"
+                    />
+                </p>
                 <p class="mt-1 text-sm text-gray-500">
-                    {{ cart_product.price }} {{ cart_product.currency }}
+                    {{ cart_product.price }} €
                 </p>
             </div>
 
@@ -80,8 +96,7 @@ const removeFromCart = () => {
                 </NumberField>
 
                 <p class="text-sm font-semibold">
-                    {{ (form.quantity * cart_product.price).toFixed(2) }}
-                    {{ cart_product.currency }}
+                    {{ (form.quantity * cart_product.price).toFixed(2) }} €
                 </p>
 
                 <Button

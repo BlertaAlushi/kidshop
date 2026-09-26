@@ -24,6 +24,7 @@ class MarkRequest extends FormRequest
         return [
             'slug'=>'nullable',
             'name'=>'required',
+            'is_active'=>'boolean',
         ];
     }
 }

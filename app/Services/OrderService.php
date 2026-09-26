@@ -3,65 +3,90 @@
 namespace App\Services;
 
 use App\Jobs\ConfirmationEmail;
+use App\Models\Country;
 use App\Models\Order;
 use App\Models\OrderAddress;
-use App\Models\Product;
-use Illuminate\Support\Facades\Auth;
+use App\Models\ProductVariant;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class OrderService
 {
-    public function saveCustomerAddress($data)
-    {
-        $address = OrderAddress::updateOrCreate(
-            ['email' => $data['email']],
-            $data
-        );
-        return $address->id;
-    }
+    public function __construct(
+        protected CartService $cartService,
+    ){}
 
-    public function createOrder($address_id){
-        $cartProducts = Auth::user()
-            ->cartProducts()
-            ->with('product')
-            ->get();
+    public function createOrder($customer){
+        $cart = $this->cartService->currentCart();
+        $cartItems = $cart->items()->with('productVariant.product', 'productVariant.size', 'productVariant.color')->get();
 
         try {
-            $order = DB::transaction(function () use ($cartProducts, $address_id) {
+            $order = DB::transaction(function () use ($cartItems, $customer) {
 
-                if ($cartProducts->isEmpty()) {
-                    throw new \Exception("Cart is empty.");
+                if ($cartItems->isEmpty()) {
+                    throw new \Exception('Cart is empty.');
                 }
+
+                $country = Country::findOrFail($customer['country']);
+                $deliveryFee = $country->delivery_fee;
 
                 $order = Order::create([
-                    'user_id' => Auth::id(),
-                    'order_address_id' => $address_id,
+                    'order_number' => 'ORD-'.strtoupper(Str::random(10)),
+                    'customer_name' => $customer['name'],
+                    'customer_phone' => $customer['phone'],
+                    'customer_email' => $customer['email'] ?? null,
                     'status' => 'pending',
-                    'total_price' => $cartProducts->sum(
-                        fn($item) => $item->quantity * $item->product->price
-                    ),
+                    'payment_method' => 'cash_on_delivery',
+                    'payment_status' => 'pending',
+                    'total_amount' => 0,
+                    'delivery_fee' => $deliveryFee,
                 ]);
 
-                foreach ($cartProducts as $cartItem) {
+                $total = 0;
 
-                    $product = Product::lockForUpdate()->find($cartItem->product_id);
+                foreach ($cartItems as $cartItem) {
+                    $variant = ProductVariant::lockForUpdate()->find($cartItem->product_variant_id);
 
-                    if (!$product || $cartItem->quantity > $product->stock_quantity) {
-                        throw new \Exception("Product ".$cartItem->product->name." is out of stock.");
+                    if (!$variant || $cartItem->quantity > $variant->stock_quantity) {
+                        throw new \Exception('Product '.$cartItem->productVariant->product->name.' is out of stock.');
                     }
 
-                    $order->products()->create([
-                        'product_id' => $product->id,
-                        'quantity'   => $cartItem->quantity,
-                        'unit_price'      => $product->price,
+                    $lineTotal = $variant->price * $cartItem->quantity;
+                    $total += $lineTotal;
+
+                    $order->items()->create([
+                        'product_variant_id' => $variant->id,
+                        'product_name' => $cartItem->productVariant->product->name,
+                        'size_name' => $cartItem->productVariant->size?->name,
+                        'color_name' => $cartItem->productVariant->color?->name,
+                        'original_unit_price' => $variant->price,
+                        'discount_amount' => 0,
+                        'unit_price' => $variant->price,
+                        'quantity' => $cartItem->quantity,
+                        'total' => $lineTotal,
                     ]);
 
-                    $product->decrement('stock_quantity', $cartItem->quantity);
+                    $variant->decrement('stock_quantity', $cartItem->quantity);
                 }
 
-                $order->update(['status' => 'confirmed']);
+                $order->update([
+                    'status' => 'confirmed',
+                    'total_amount' => $total + $deliveryFee,
+                ]);
 
-                Auth::user()->cartProducts()->delete();
+                OrderAddress::create([
+                    'order_id' => $order->id,
+                    'type' => 'shipping',
+                    'first_name' => $customer['name'],
+                    'last_name' => '',
+                    'phone' => $customer['phone'],
+                    'address' => $customer['address'],
+                    'city' => $customer['city'],
+                    'postal_code' => $customer['zip'],
+                    'country' => $customer['country'],
+                ]);
+
+                $cartItems->each->delete();
 
                 return $order;
             });

@@ -28,7 +28,7 @@ class CustomerRequest extends FormRequest
             'address'=>'required',
             'zip'=>'required',
             'city'=>'required',
-            'country'=>'required',
+            'country'=>'required|exists:countries,iso_2',
         ];
     }
 }

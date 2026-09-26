@@ -6,7 +6,7 @@ import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { initializeTheme } from './composables/useAppearance';
 import { ZiggyVue } from 'ziggy-js';
-import { i18n, loadLocale } from './i18n';
+import { DEFAULT_LOCALE, i18n, loadLocale } from './i18n';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -18,9 +18,7 @@ createInertiaApp({
             import.meta.glob<DefineComponent>('./pages/**/*.vue'),
         ),
     async setup({ el, App, props, plugin }) {
-        const rawLocale = props.initialPage.props.locale;
-        const locale: string = typeof rawLocale === 'string' ? rawLocale : 'en';
-        await loadLocale(locale);
+        await loadLocale(DEFAULT_LOCALE);
         createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {defineProps, reactive } from 'vue';
+import { reactive } from 'vue';
 import { Search, X } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,14 +9,8 @@ const props = defineProps<{
     filters: Filters;
 }>();
 
-const form = reactive<Filters>({
-    skin_types: [...(props.filters.skin_types ?? [])],
-    skin_concerns: [...(props.filters.skin_concerns ?? [])],
-    product_types: [...(props.filters.product_types ?? [])],
-    extras: [...(props.filters.extras ?? [])],
-    order_by: props.filters.order_by ?? null,
-    per_page: props.filters.per_page ?? null,
-    search: props.filters.search ?? null,
+const form = reactive({
+    search: props.filters.search ?? '',
 });
 
 const emit = defineEmits<{

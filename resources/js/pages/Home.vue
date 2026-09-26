@@ -51,7 +51,7 @@ defineProps<{
                         role="listitem"
                     >
                         <a :href="route('collection.product', product.slug)">
-                            <ItemHeader>
+                            <ItemHeader class="flex-col items-start justify-start">
                                 <img
                                     :src="product.image"
                                     :alt="product.name"
@@ -59,12 +59,26 @@ defineProps<{
                                     height="128"
                                     class="aspect-square w-full rounded-sm object-cover"
                                 />
+                                <div
+                                    v-if="product.colors?.length"
+                                    class="mt-2 flex items-center gap-1.5"
+                                >
+                                    <span
+                                        v-for="color in product.colors"
+                                        :key="color.id"
+                                        :title="color.name"
+                                        class="size-6 rounded-sm border border-black/10"
+                                        :style="{
+                                            backgroundColor:
+                                                color.hex_code ?? '#e5e5e5',
+                                        }"
+                                    />
+                                </div>
                             </ItemHeader>
                             <ItemContent>
                                 <ItemTitle>{{ product.name }}</ItemTitle>
                                 <ItemDescription
-                                    >{{ product.price }}
-                                    {{ product.currency }}
+                                    >{{ product.price }} €
                                 </ItemDescription>
                             </ItemContent>
                         </a>

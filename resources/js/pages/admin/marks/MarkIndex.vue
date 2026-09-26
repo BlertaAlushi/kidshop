@@ -16,13 +16,18 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 defineProps<{
-    marks: { id: number; name: string; slug: string }[];
+    marks: { id: number; name: string; slug: string; is_active: boolean }[];
 }>();
 
 const columns: ColumnDef<any>[] = [
     { accessorKey: 'id', header: 'ID' },
     { accessorKey: 'name', header: t('admin.name') },
     { accessorKey: 'slug', header: t('admin.slug') },
+    {
+        accessorKey: 'is_active',
+        header: t('admin.is_active'),
+        cell: (info) => (info.row.original.is_active ? t('admin.yes') : t('admin.no')),
+    },
 ];
 </script>
 

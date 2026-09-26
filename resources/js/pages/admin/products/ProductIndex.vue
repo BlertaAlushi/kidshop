@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AdminLayout.vue';
-import { type BreadcrumbItem, Product } from '@/types';
+import { type BreadcrumbItem, AdminProduct } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { route } from 'ziggy-js';
@@ -8,7 +8,6 @@ import { route } from 'ziggy-js';
 import { ColumnDef } from '@tanstack/vue-table';
 
 import DataTable from '@/components/DataTable.vue';
-import { computed } from 'vue';
 
 const { t } = useI18n();
 
@@ -16,20 +15,33 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: t('home.products'), href: route('admin.products.index') },
 ];
 
-const props = defineProps<{
-    products: { data: Product[] };
+defineProps<{
+    products: AdminProduct[];
 }>();
-
-const computedProducts = computed(() => props.products.data);
 
 const columns: ColumnDef<any>[] = [
     { accessorKey: 'id', header: 'ID' },
     { accessorKey: 'name', header: t('admin.name') },
-    { accessorKey: 'slug', header: t('admin.slug') },
-    { accessorKey: 'price', header: t('admin.price') },
-    { accessorKey: 'currency', header: t('admin.currency') },
-    { accessorKey: 'stock_quantity', header: t('admin.stock_quantity') },
-    { accessorKey: 'mark', header: t('home.brand') },
+    {
+        accessorKey: 'category',
+        header: t('admin.category'),
+        cell: (info) => info.row.original.category?.name ?? '-',
+    },
+    {
+        accessorKey: 'brand',
+        header: t('home.brand'),
+        cell: (info) => info.row.original.brand?.name ?? '-',
+    },
+    { accessorKey: 'gender', header: t('admin.gender') },
+    {
+        accessorKey: 'variants_count',
+        header: t('admin.variants'),
+    },
+    {
+        accessorKey: 'is_active',
+        header: t('admin.is_active'),
+        cell: (info) => (info.row.original.is_active ? t('admin.yes') : t('admin.no')),
+    },
 ];
 </script>
 
@@ -37,10 +49,6 @@ const columns: ColumnDef<any>[] = [
     <Head :title="t('home.products')" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <DataTable
-            :table_rows="computedProducts"
-            :columns="columns"
-            page_name="products"
-        />
+        <DataTable :table_rows="products" :columns="columns" page_name="products" />
     </AppLayout>
 </template>

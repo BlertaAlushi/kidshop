@@ -2,34 +2,33 @@
 
 namespace App\Services;
 
-use App\Models\BodyPart;
-use App\Models\Extra;
-use App\Models\Mark;
-use App\Models\ProductType;
-use App\Models\SkinConcern;
-use App\Models\SkinType;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Color;
+use App\Models\Season;
+use App\Models\Size;
 use App\Resources\MenuResource;
-use Illuminate\Http\Request;
 
 class FilterOptionsService
 {
     public static function menuOptions(){
         return [
-            'bodyParts' => MenuResource::collection(BodyPart::select('id','slug','name')->with('translation:body_part_id,name')->get()),
-            'skinTypes' => MenuResource::collection(SkinType::select('id','slug','name')->with('translation:skin_type_id,name')->get()),
-            'skinConcerns' => MenuResource::collection(SkinConcern::select('id','slug','name')->with('translation:skin_concern_id,name')->get()),
-            'productTypes' => MenuResource::collection(ProductType::select('id','slug','name')->with('translation:product_type_id,name')->get()),
-            'extras' => MenuResource::collection(Extra::select('id','slug','name')->with('translation:extra_id,name')->get()),
-            'marks' => MenuResource::collection(Mark::select('id','slug','name')->get()),
+            'categories' => MenuResource::collection(Category::where('is_active', true)->select('id','slug','name')->get()),
+            'brands' => MenuResource::collection(Brand::where('is_active', true)->select('id','slug','name')->get()),
+            'seasons' => MenuResource::collection(Season::where('is_active', true)->select('id','slug','name')->get()),
+            'colors' => MenuResource::collection(Color::select('id','name')->get()),
+            'sizes' => MenuResource::collection(Size::select('id','name')->orderBy('sort_order')->get()),
         ];
     }
 
     public static function filters($request){
         return [
-            'skin_types' => $request->skin_types ?? [],
-            'skin_concerns' => $request->skin_concerns ?? [],
-            'product_types' => $request->product_types ?? [],
-            'extras' => $request->extras ?? [],
+            'categories' => $request->categories ?? [],
+            'brands' => $request->brands ?? [],
+            'seasons' => $request->seasons ?? [],
+            'colors' => $request->colors ?? [],
+            'sizes' => $request->sizes ?? [],
+            'gender' => $request->gender ?? null,
             'per_page'=> $request->per_page ?? null,
             'order_by'=> $request->order_by ?? null,
             'search'=> $request->search ?? null,

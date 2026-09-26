@@ -19,7 +19,7 @@ const page = usePage<PageType>();
 const cartTotalPrice = computed(() => page.props.cartTotalPrice);
 
 const props = defineProps<{
-    cartProducts: { data: cart_product[] };
+    cartItems: { data: cart_product[] };
 }>();
 
 const checkOut = () => {
@@ -33,12 +33,12 @@ const checkOut = () => {
     <AppLayout>
         <div class="w-full p-8 md:p-20">
             <div
-                v-if="props.cartProducts.data.length > 0"
+                v-if="props.cartItems.data.length > 0"
                 class="flex flex-col items-start gap-10 md:flex-row"
             >
                 <div class="flex-1 justify-items-center space-y-6">
                     <CartProduct
-                        v-for="product in props.cartProducts.data"
+                        v-for="product in props.cartItems.data"
                         :key="product.id"
                         :cart_product="product"
                     />

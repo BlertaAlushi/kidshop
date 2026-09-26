@@ -17,6 +17,23 @@
     "code": "Code",
     "language": "Language",
     "slug": "Slug",
+    "sort_order": "Sort Order",
+    "hex_code": "Hex Code",
+    "iso_2": "ISO Code",
+    "delivery_fee": "Delivery Fee",
+    "is_active": "Active",
+    "category": "Category",
+    "gender": "Gender",
+    "boy": "Boy",
+    "girl": "Girl",
+    "unisex": "Unisex",
+    "variants": "Variants",
+    "sku": "SKU",
+    "primary": "Primary",
+    "images": "Images",
+    "add": "Add",
+    "yes": "Yes",
+    "no": "No",
     "skin-types": {
         "new": "New Skin Type",
         "edit": "Edit Skin Type",
@@ -67,6 +84,34 @@
         "edited_success": "Language edited successfully!",
         "created_success": "Language created successfully!",
         "deleted_success": "Language deleted successfully!"
+    },
+    "sizes": {
+        "new": "New Size",
+        "edit": "Edit Size",
+        "edited_success": "Size edited successfully!",
+        "created_success": "Size created successfully!",
+        "deleted_success": "Size deleted successfully!"
+    },
+    "categories": {
+        "new": "New Category",
+        "edit": "Edit Category",
+        "edited_success": "Category edited successfully!",
+        "created_success": "Category created successfully!",
+        "deleted_success": "Category deleted successfully!"
+    },
+    "colors": {
+        "new": "New Color",
+        "edit": "Edit Color",
+        "edited_success": "Color edited successfully!",
+        "created_success": "Color created successfully!",
+        "deleted_success": "Color deleted successfully!"
+    },
+    "countries": {
+        "new": "New Country",
+        "edit": "Edit Country",
+        "edited_success": "Country edited successfully!",
+        "created_success": "Country created successfully!",
+        "deleted_success": "Country deleted successfully!"
     },
     "products": {
         "new": "New Product",

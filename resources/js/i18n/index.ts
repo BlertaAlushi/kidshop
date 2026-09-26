@@ -1,8 +1,11 @@
 import { createI18n } from 'vue-i18n';
 
+export const DEFAULT_LOCALE = 'al';
+
 export const i18n = createI18n({
     legacy: false,
-    fallbackLocale: 'en',
+    locale: DEFAULT_LOCALE,
+    fallbackLocale: DEFAULT_LOCALE,
     globalInjection: true,
     messages: {},
 });

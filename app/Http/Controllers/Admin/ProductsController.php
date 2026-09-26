@@ -5,8 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
 use App\Interfaces\Services\LookupInterface;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Color;
 use App\Models\Product;
-use Illuminate\Http\Request;
+use App\Models\Season;
+use App\Models\Size;
 use Inertia\Inertia;
 
 class ProductsController extends Controller
@@ -29,7 +33,7 @@ class ProductsController extends Controller
      */
     public function create()
     {
-        return Inertia::render('admin/products/ProductNew');
+        return Inertia::render('admin/products/ProductNew', $this->formOptions());
     }
 
     /**
@@ -38,11 +42,6 @@ class ProductsController extends Controller
     public function store(ProductRequest $request)
     {
         $data = $request->validated();
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
-            $data['image'] = $imagePath;
-        }
-
         $this->lookup->store($data);
         return redirect()->route('admin.products.index')->with('success','created_success');
     }
@@ -61,16 +60,18 @@ class ProductsController extends Controller
     public function edit(Product $product)
     {
         $product->load([
-            'translations',
-            'bodyParts',
-            'productTypes',
-            'skinTypes',
-            'skinConcerns',
-            'extras'
+            'category',
+            'brand',
+            'seasons',
+            'variants.size',
+            'variants.color',
+            'images.color',
         ]);
-        return Inertia::render('admin/products/ProductEdit', [
-            'product' => $product,
-        ]);
+
+        return Inertia::render('admin/products/ProductEdit', array_merge(
+            ['product' => $product],
+            $this->formOptions()
+        ));
     }
 
     /**
@@ -79,11 +80,6 @@ class ProductsController extends Controller
     public function update(ProductRequest $request, Product $product)
     {
         $data = $request->validated();
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
-            $data['image'] = $imagePath;
-        }
-
         $this->lookup->update($data, $product);
         return redirect()->route('admin.products.index')->with('success','edited_success');
     }
@@ -97,4 +93,14 @@ class ProductsController extends Controller
         return redirect()->back()->with('success','deleted_success');
     }
 
+    protected function formOptions(): array
+    {
+        return [
+            'categories' => Category::where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'brands' => Brand::where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'sizes' => Size::orderBy('sort_order')->get(['id', 'name']),
+            'colors' => Color::orderBy('name')->get(['id', 'name', 'hex_code']),
+            'seasons' => Season::where('is_active', true)->orderBy('name')->get(['id', 'name']),
+        ];
+    }
 }

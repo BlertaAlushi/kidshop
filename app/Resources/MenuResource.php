@@ -8,11 +8,10 @@ class MenuResource extends JsonResource
 {
     public function toArray($request)
     {
-        $data = [
+        return [
             'id' => $this->id,
             'slug' => $this->slug,
-            'name'=>$this->translation?$this->translation->name:$this->name,
+            'name' => $this->name,
         ];
-        return $data;
     }
 }

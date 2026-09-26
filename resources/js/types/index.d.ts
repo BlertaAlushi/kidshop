@@ -2,7 +2,7 @@ import { InertiaLinkProps } from '@inertiajs/vue3';
 import type { LucideIcon } from 'lucide-vue-next';
 
 export interface Auth {
-    user: User;
+    user: User | null;
 }
 
 export interface BreadcrumbItem {
@@ -38,36 +38,61 @@ export interface User {
     admin:boolean;
 }
 
+export interface ProductColorOption {
+    id: number;
+    name: string;
+    hex_code: string | null;
+    image: string | null;
+    images: string[];
+}
+
+export interface ProductVariantOption {
+    id: number;
+    price: number;
+    stock_quantity: number;
+    is_active: boolean;
+    size: { id: number; name: string; sort_order: number } | null;
+    color: { id: number; name: string; hex_code: string | null } | null;
+}
+
 export interface Product {
     id: number;
     name: string;
     slug:string;
-    description:string;
-    price: number;
-    currency: string;
+    description:string | null;
+    gender: 'boy' | 'girl' | 'unisex';
+    price: number | null;
     stock_quantity: number;
-    mark:string;
-    image:string,
+    category: string | null;
+    brand: string | null;
+    image: string | null;
+    default_variant: { id: number; price: number; stock_quantity: number } | null;
+    colors: ProductColorOption[];
+    variants: ProductVariantOption[];
 }
 
 export interface CartProduct {
     id: number;
-    user_id: number;
-    product_id: number;
+    product_variant_id: number;
+    product_slug: string;
     name:string;
+    size: string | null;
+    color: string | null;
+    color_hex: string | null;
     price:number;
     quantity:number;
-    currency:string;
-    image:string;
+    image:string | null;
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;
 
 export interface Filters {
-    skin_types: number[];
-    skin_concerns: number[];
-    product_types: number[];
-    extras: number[];
+    categories: number[];
+    brands: number[];
+    seasons: number[];
+    colors: number[];
+    sizes: number[];
+    gender: string | null;
     per_page: string | null;
     order_by: string | null;
     search:string | '';
@@ -79,19 +104,12 @@ export interface MenuItem {
     name: string;
 }
 
-export interface Language {
-    id:number
-    code: string;
-    language: string;
-}
-
 export interface MenuType {
-    bodyParts: MenuData;
-    productTypes: MenuData;
-    skinTypes: MenuData;
-    skinConcerns: MenuData;
-    extras: MenuData;
-    marks: MenuData;
+    categories: MenuData;
+    brands: MenuData;
+    seasons: MenuData;
+    colors: MenuData;
+    sizes: MenuData;
 }
 
 interface MenuData{
@@ -100,7 +118,6 @@ interface MenuData{
 
 export interface PageType extends AppPageProps{
     menu: MenuType;
-    languages: Language[];
     app_domain:string;
     flash:{
         success:string| null;
@@ -125,22 +142,82 @@ export interface Mark {
     id: number;
     slug: string;
     name: string;
+    is_active: boolean;
 }
 
-export interface ProductForm {
+export interface Size {
+    id: number;
+    name: string;
+    sort_order: number;
+}
+
+export interface Category {
+    id: number;
+    slug: string;
+    name: string;
+    is_active: boolean;
+}
+
+export interface Color {
+    id: number;
+    name: string;
+    hex_code: string | null;
+}
+
+export interface Brand {
+    id: number;
+    slug?: string;
+    name: string;
+    is_active: boolean;
+}
+
+export interface Country {
+    iso_2: string;
+    country: string;
+    delivery_fee: number;
+}
+
+export interface Season {
+    id: number;
+    slug?: string;
+    name: string;
+    is_active: boolean;
+}
+
+export interface AdminProductVariant {
     id?: number;
+    size_id: number | null;
+    color_id: number | null;
+    sku: string;
+    price: number;
+    stock_quantity: number;
+    is_active: boolean;
+    size?: Size;
+    color?: Color;
+}
+
+export interface AdminProductImage {
+    id: number;
+    color_id: number | null;
+    path: string;
+    sort_order: number;
+    is_primary: boolean;
+    color?: Color;
+}
+
+export interface AdminProduct {
+    id: number;
+    category_id: number;
+    brand_id: number;
     name: string;
     slug: string;
-    description: string;
-    price: number;
-    currency: string;
-    stock_quantity: number;
-    mark_id: number| null;
-    image: string | null;
-    translations: Translation[];
-    body_parts: number[];
-    skin_types: number[];
-    skin_concerns: number[];
-    product_types: number[];
-    extras: number[];
+    description: string | null;
+    gender: 'boy' | 'girl' | 'unisex';
+    is_active: boolean;
+    category?: Category;
+    brand?: Brand;
+    seasons?: Season[];
+    variants?: AdminProductVariant[];
+    images?: AdminProductImage[];
+    variants_count?: number;
 }

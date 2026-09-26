@@ -33,6 +33,11 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
+            $table->foreignId('color_id')
+                ->nullable()
+                ->constrained()
+                ->cascadeOnDelete();
+
             $table->timestamps();
 
             $table->index('promotion_id');

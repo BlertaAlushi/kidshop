@@ -3,10 +3,8 @@
 namespace App\Http\Middleware;
 use App\Services\CartService;
 use App\Services\FilterOptionsService;
-use App\Services\LanguageService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -40,13 +38,8 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
-//        $menu = Cache::remember('menu', 3600, function () {
-//            return FilterOptionsService::menuOptions();
-//        });
         $menu = FilterOptionsService::menuOptions();
-        $languages = (new LanguageService())->index();
-        $cart_products_count = CartService::cartProductCount();
-        $cart_total_price = CartService::cartTotal();
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -56,13 +49,12 @@ class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'menu' => $menu,
-            'languages' => $languages,
             'app_domain'=>config('app.domain'),
             'flash' => [
                 'success' => $request->session()->get('success'),
             ],
-            'cartProductCount'=>$cart_products_count,
-            'cartTotalPrice'=> $cart_total_price,
+            'cartProductCount'=>CartService::cartProductCount(),
+            'cartTotalPrice'=> CartService::cartTotal(),
         ];
     }
 }

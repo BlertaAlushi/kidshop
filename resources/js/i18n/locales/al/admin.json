@@ -17,52 +17,105 @@
     "code": "Code",
     "language": "Language",
     "slug": "Slug",
+    "sort_order": "Renditja",
+    "hex_code": "Kodi Hex",
+    "iso_2": "Kodi ISO",
+    "delivery_fee": "Tarifa e Dërgesës",
+    "is_active": "Aktiv",
+    "category": "Kategoria",
+    "gender": "Gjinia",
+    "boy": "Djalë",
+    "girl": "Vajzë",
+    "unisex": "Uniseks",
+    "variants": "Variantet",
+    "sku": "SKU",
+    "primary": "Kryesore",
+    "images": "Fotot",
+    "add": "Shto",
+    "yes": "Po",
+    "no": "Jo",
     "skin-types": {
         "new": "New Skin Type",
         "edit": "Edit Skin Type",
         "edited_success": "Skin type edited successfully!",
-        "created_success": "Skin type created successfully!"
+        "created_success": "Skin type created successfully!",
+        "deleted_success": "Lloji i lëkurës u fshi me sukses!"
     },
     "skin-concerns": {
         "new": "New Skin Concern",
         "edit": "Edit Skin Concern",
         "edited_success": "Skin concern edited successfully!",
-        "created_success": "Skin concern created successfully!"
+        "created_success": "Skin concern created successfully!",
+        "deleted_success": "Problemi i lëkurës u fshi me sukses!"
     },
     "product-types": {
         "new": "New Product Type",
         "edit": "Edit Product Type",
         "edited_success": "Product type edited successfully!",
-        "created_success": "Product type created successfully!"
+        "created_success": "Product type created successfully!",
+        "deleted_success": "Kategoria e produktit u fshi me sukses!"
     },
     "body-parts": {
         "new": "New Body Part",
         "edit": "Edit Body Part",
         "edited_success": "Body part edited successfully!",
-        "created_success": "Body part created successfully!"
+        "created_success": "Body part created successfully!",
+        "deleted_success": "Pjesa e trupit u fshi me sukses!"
     },
     "extras": {
         "new": "New Extra",
         "edit": "Edit Extra",
         "edited_success": "Extra edited successfully!",
-        "created_success": "Extra created successfully!"
+        "created_success": "Extra created successfully!",
+        "deleted_success": "Extra u fshi me sukses!"
     },
     "marks": {
         "new": "New Mark",
         "edit": "Edit Mark",
         "edited_success": "Mark edited successfully!",
-        "created_success": "Mark created successfully!"
+        "created_success": "Mark created successfully!",
+        "deleted_success": "Marka u fshi me sukses!"
     },
     "languages": {
         "new": "New Language",
         "edit": "Edit Language",
         "edited_success": "Language edited successfully!",
-        "created_success": "Language created successfully!"
+        "created_success": "Language created successfully!",
+        "deleted_success": "Gjuha u fshi me sukses!"
+    },
+    "sizes": {
+        "new": "Madhesi e Re",
+        "edit": "Ndrysho Madhesine",
+        "edited_success": "Madhesia u ndryshua me sukses!",
+        "created_success": "Madhesia u krijua me sukses!",
+        "deleted_success": "Madhesia u fshi me sukses!"
+    },
+    "categories": {
+        "new": "Kategori e Re",
+        "edit": "Ndrysho Kategorine",
+        "edited_success": "Kategoria u ndryshua me sukses!",
+        "created_success": "Kategoria u krijua me sukses!",
+        "deleted_success": "Kategoria u fshi me sukses!"
+    },
+    "colors": {
+        "new": "Ngjyre e Re",
+        "edit": "Ndrysho Ngjyren",
+        "edited_success": "Ngjyra u ndryshua me sukses!",
+        "created_success": "Ngjyra u krijua me sukses!",
+        "deleted_success": "Ngjyra u fshi me sukses!"
+    },
+    "countries": {
+        "new": "Shtet i Ri",
+        "edit": "Ndrysho Shtetin",
+        "edited_success": "Shteti u ndryshua me sukses!",
+        "created_success": "Shteti u krijua me sukses!",
+        "deleted_success": "Shteti u fshi me sukses!"
     },
     "products": {
         "new": "New Product",
         "edit": "Edit Product",
         "edited_success": "Product edited successfully!",
-        "created_success": "Product created successfully!"
+        "created_success": "Product created successfully!",
+        "deleted_success": "Produkti u fshi me sukses!"
     }
 }
