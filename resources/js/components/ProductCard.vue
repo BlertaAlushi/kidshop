@@ -2,6 +2,8 @@
 import { ProductVariantListItem } from '@/types';
 import { route } from 'ziggy-js';
 import { router } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import ProductPrice from '@/components/ProductPrice.vue';
 import {
     Item,
@@ -11,9 +13,13 @@ import {
     ItemTitle,
 } from '@/components/ui/item';
 
-defineProps<{
+const { t } = useI18n();
+
+const props = defineProps<{
     item: ProductVariantListItem;
 }>();
+
+const isSoldOut = computed(() => props.item.stock_quantity <= 0);
 </script>
 
 <template>
@@ -25,25 +31,46 @@ defineProps<{
     >
         <a
             :href="
-                route('collection.product', item.slug) +
-                (item.color ? `?color=${item.color.id}` : '')
+                isSoldOut
+                    ? undefined
+                    : route('collection.product', item.slug) +
+                      (item.color ? `?color=${item.color.id}` : '')
             "
+            :aria-disabled="isSoldOut"
+            :tabindex="isSoldOut ? -1 : undefined"
+            :class="isSoldOut ? 'pointer-events-none cursor-not-allowed' : ''"
+            @click="isSoldOut && $event.preventDefault()"
         >
             <ItemHeader class="flex-col items-start justify-start gap-0">
                 <div
-                    class="aspect-square w-full overflow-hidden rounded-2xl bg-muted"
+                    class="relative aspect-square w-full overflow-hidden rounded-2xl bg-muted"
                 >
                     <img
                         :src="item.image"
                         :alt="item.name"
                         width="256"
                         height="256"
-                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        class="h-full w-full object-cover transition-transform duration-300"
+                        :class="
+                            isSoldOut
+                                ? 'opacity-50 grayscale'
+                                : 'group-hover:scale-105'
+                        "
                     />
+                    <div
+                        v-if="isSoldOut"
+                        class="absolute inset-0 flex items-center justify-center"
+                    >
+                        <span
+                            class="rounded-full bg-foreground px-3 py-1 text-xs font-semibold tracking-wide text-background uppercase"
+                        >
+                            {{ t('home.out_of_stock') }}
+                        </span>
+                    </div>
                 </div>
                 <div
                     v-if="item.colors?.length"
-                    class="mt-3 flex flex-wrap items-center gap-1.5"
+                    class="pointer-events-auto mt-3 flex flex-wrap items-center gap-1.5"
                 >
                     <span
                         v-for="color in item.colors"

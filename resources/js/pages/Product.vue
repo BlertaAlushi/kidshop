@@ -72,7 +72,20 @@ const selectedSizeId = ref<number | null>(
     defaultVariant.value?.size?.id ?? sizesForColor.value[0]?.id ?? null,
 );
 
+const isColorSoldOut = (colorId: number) => {
+    const colorVariants = variants.value.filter(
+        (variant) => variant.color?.id === colorId,
+    );
+
+    return (
+        colorVariants.length > 0 &&
+        colorVariants.every((variant) => variant.stock_quantity <= 0)
+    );
+};
+
 const selectVariant = (colorId: number) => {
+    if (isColorSoldOut(colorId)) return;
+
     selectedColorId.value = colorId;
     const firstSize = sizesForColor.value[0];
     selectedSizeId.value = firstSize?.id ?? null;
@@ -232,12 +245,19 @@ const addToCart = () => {
                                 v-for="color in colors"
                                 :key="color.id"
                                 type="button"
-                                :title="color.name"
-                                class="size-8 cursor-pointer rounded-full transition-transform hover:scale-110 focus-visible:outline-none"
+                                :title="
+                                    isColorSoldOut(color.id)
+                                        ? `${color.name} (${t('home.out_of_stock')})`
+                                        : color.name
+                                "
+                                :disabled="isColorSoldOut(color.id)"
+                                class="relative size-8 shrink-0 rounded-full transition-transform focus-visible:outline-none"
                                 :class="
-                                    selectedColorId === color.id
-                                        ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
-                                        : 'ring-1 ring-border ring-offset-2 ring-offset-background hover:ring-primary/50'
+                                    isColorSoldOut(color.id)
+                                        ? 'cursor-not-allowed ring-1 ring-border ring-offset-2 ring-offset-background opacity-40'
+                                        : selectedColorId === color.id
+                                          ? 'cursor-pointer ring-2 ring-primary ring-offset-2 ring-offset-background hover:scale-110'
+                                          : 'cursor-pointer ring-1 ring-border ring-offset-2 ring-offset-background hover:scale-110 hover:ring-primary/50'
                                 "
                                 @click="selectVariant(color.id)"
                             >
@@ -247,6 +267,19 @@ const addToCart = () => {
                                         backgroundColor:
                                             color.hex_code ?? '#e5e5e5',
                                     }"
+                                />
+                                <span
+                                    v-if="isColorSoldOut(color.id)"
+                                    class="pointer-events-none absolute inset-0 rounded-full"
+                                    style="
+                                        background: linear-gradient(
+                                            to top right,
+                                            transparent calc(50% - 1px),
+                                            rgba(0, 0, 0, 0.6) calc(50% - 1px),
+                                            rgba(0, 0, 0, 0.6) calc(50% + 1px),
+                                            transparent calc(50% + 1px)
+                                        );
+                                    "
                                 />
                             </button>
                         </div>

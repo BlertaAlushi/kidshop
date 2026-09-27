@@ -30,6 +30,12 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { ChevronDown } from 'lucide-vue-next';
 
 import UserMenuContent from '@/components/UserMenuContent.vue';
 import { getInitials } from '@/composables/useInitials';
@@ -106,6 +112,10 @@ const mainNavItems: NavItem[] = [
         href: route('home'),
         // icon: LayoutGrid,
     },
+    {
+        title: t('home.all_products'),
+        href: route('collection.all'),
+    },
 ];
 </script>
 
@@ -153,6 +163,39 @@ const mainNavItems: NavItem[] = [
                                     />
                                     {{ item.title }}
                                 </Link>
+
+                                <Collapsible
+                                    v-for="menuItem in menu"
+                                    :key="menuItem.key"
+                                    as="div"
+                                    class="space-y-1"
+                                >
+                                    <CollapsibleTrigger
+                                        class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent [&[data-state=open]>svg]:rotate-180"
+                                    >
+                                        {{ menuItem.title }}
+                                        <ChevronDown
+                                            class="h-4 w-4 shrink-0 transition-transform duration-200"
+                                        />
+                                    </CollapsibleTrigger>
+                                    <CollapsibleContent
+                                        class="space-y-1 pl-3"
+                                    >
+                                        <a
+                                            v-for="item in menuItem.items"
+                                            :key="item.slug"
+                                            :href="
+                                                route(
+                                                    menuItem.url,
+                                                    item.slug,
+                                                )
+                                            "
+                                            class="block rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                        >
+                                            {{ item.name }}
+                                        </a>
+                                    </CollapsibleContent>
+                                </Collapsible>
                             </nav>
                         </div>
                     </SheetContent>

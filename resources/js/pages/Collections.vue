@@ -3,11 +3,10 @@ import { Head, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SideBarFilters from '@/components/SideBarFilters.vue';
 import { type Filters, ProductVariantListItem, type PageType } from '@/types';
-import ProductPrice from '@/components/ProductPrice.vue';
+import ProductCard from '@/components/ProductCard.vue';
 import { computed, reactive, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
-import { Ellipsis, Search } from 'lucide-vue-next';
-import { route } from 'ziggy-js'
+import { Ellipsis, Search, SlidersHorizontal } from 'lucide-vue-next';
 import {
     Select,
     SelectContent,
@@ -17,14 +16,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { ItemGroup } from '@/components/ui/item';
 import {
-    Item,
-    ItemContent,
-    ItemDescription,
-    ItemGroup,
-    ItemHeader,
-    ItemTitle,
-} from '@/components/ui/item';
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from '@/components/ui/sheet';
 
 import {
     Empty,
@@ -98,6 +97,18 @@ const searchOpen = ref(!!props.filters.search?.length);
 function toggleSearch() {
     searchOpen.value = !searchOpen.value;
 }
+
+const mobileFiltersOpen = ref(false);
+
+const activeFilterCount = computed(
+    () =>
+        form.categories.length +
+        form.brands.length +
+        form.seasons.length +
+        form.colors.length +
+        form.sizes.length +
+        (form.gender ? 1 : 0),
+);
 </script>
 
 <template>
@@ -106,11 +117,13 @@ function toggleSearch() {
         <div
             class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-10 lg:flex-row lg:gap-x-10"
         >
-            <SideBarFilters
-                :filters="form"
-                :filterOptions="filterOptions"
-                @update:filters="(update) => Object.assign(form, update)"
-            />
+            <div class="hidden lg:block">
+                <SideBarFilters
+                    :filters="form"
+                    :filterOptions="filterOptions"
+                    @update:filters="(update) => Object.assign(form, update)"
+                />
+            </div>
             <main class="flex flex-1 flex-col gap-y-8">
                 <div
                     class="flex flex-wrap items-center justify-between gap-3"
@@ -119,6 +132,44 @@ function toggleSearch() {
                         {{ t('home.products') }}
                     </h1>
                     <div class="flex flex-wrap items-center gap-2">
+                        <div class="lg:hidden">
+                            <Sheet v-model:open="mobileFiltersOpen">
+                                <SheetTrigger as-child>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        class="cursor-pointer gap-2 rounded-full"
+                                    >
+                                        <SlidersHorizontal class="size-4" />
+                                        {{ t('home.filters') }}
+                                        <span
+                                            v-if="activeFilterCount"
+                                            class="flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-foreground px-1 text-[10px] font-bold text-background"
+                                        >
+                                            {{ activeFilterCount }}
+                                        </span>
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent
+                                    side="left"
+                                    class="w-80 overflow-y-auto p-6"
+                                >
+                                    <SheetHeader class="p-0">
+                                        <SheetTitle>{{
+                                            t('home.filters')
+                                        }}</SheetTitle>
+                                    </SheetHeader>
+                                    <SideBarFilters
+                                        :filters="form"
+                                        :filterOptions="filterOptions"
+                                        @update:filters="
+                                            (update) =>
+                                                Object.assign(form, update)
+                                        "
+                                    />
+                                </SheetContent>
+                            </Sheet>
+                        </div>
                         <Button
                             variant="ghost"
                             size="icon"
@@ -185,77 +236,11 @@ function toggleSearch() {
                         <ItemGroup
                             class="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3"
                         >
-                            <Item
-                                class="group gap-3 border-none p-0"
+                            <ProductCard
                                 v-for="item in products.data"
                                 :key="item.id"
-                                variant="outline"
-                                as-child
-                                role="listitem"
-                            >
-                                <a
-                                    :href="
-                                        route('collection.product', item.slug) +
-                                        (item.color ? `?color=${item.color.id}` : '')
-                                    "
-                                >
-                                    <ItemHeader class="flex-col items-start justify-start gap-0">
-                                        <div
-                                            class="aspect-square w-full overflow-hidden rounded-2xl bg-muted"
-                                        >
-                                            <img
-                                                :src="item.image"
-                                                :alt="item.name"
-                                                width="256"
-                                                height="256"
-                                                class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                            />
-                                        </div>
-                                        <div
-                                            v-if="item.colors?.length"
-                                            class="mt-3 flex flex-wrap items-center gap-1.5"
-                                        >
-                                            <span
-                                                v-for="color in item.colors"
-                                                :key="color.id"
-                                                :title="color.name"
-                                                role="button"
-                                                tabindex="0"
-                                                class="size-4 shrink-0 cursor-pointer rounded-full transition-transform hover:scale-110"
-                                                :class="
-                                                    item.color?.id === color.id
-                                                        ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
-                                                        : 'ring-1 ring-border hover:ring-primary/50'
-                                                "
-                                                :style="{
-                                                    backgroundColor:
-                                                        color.hex_code ??
-                                                        '#e5e5e5',
-                                                }"
-                                                @click.stop.prevent="
-                                                    router.get(
-                                                        route(
-                                                            'collection.product',
-                                                            item.slug,
-                                                        ) + `?color=${color.id}`,
-                                                    )
-                                                "
-                                            />
-                                        </div>
-                                    </ItemHeader>
-                                    <ItemContent class="px-0.5">
-                                        <ItemTitle class="text-sm font-medium">{{
-                                            item.name
-                                        }}</ItemTitle>
-                                        <ItemDescription>
-                                            <ProductPrice
-                                                :price="item.price"
-                                                :original-price="item.original_price"
-                                            />
-                                        </ItemDescription>
-                                    </ItemContent>
-                                </a>
-                            </Item>
+                                :item="item"
+                            />
                         </ItemGroup>
                     </div>
                     <div class="ml-auto flex items-center gap-2">
