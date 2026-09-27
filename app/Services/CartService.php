@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Resources\CartResource;
+use App\Services\Products\PromotionPricingService;
 use Illuminate\Support\Facades\Session;
 
 class CartService
@@ -28,8 +29,11 @@ class CartService
         if (!$cart) {
             return 0;
         }
-        $items = $cart->items()->with('productVariant')->get();
-        return $items->sum(fn($item) => $item->quantity * $item->productVariant->price);
+        $items = $cart->items()->with('productVariant.product')->get();
+        $promotionPricing = resolve(PromotionPricingService::class);
+        return $items->sum(
+            fn($item) => $item->quantity * $promotionPricing->priceForVariant($item->productVariant)['price']
+        );
     }
 
     public function index(){

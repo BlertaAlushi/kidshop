@@ -7,6 +7,7 @@ use App\Models\Country;
 use App\Models\Order;
 use App\Models\OrderAddress;
 use App\Models\ProductVariant;
+use App\Services\Products\PromotionPricingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -14,6 +15,7 @@ class OrderService
 {
     public function __construct(
         protected CartService $cartService,
+        protected PromotionPricingService $promotionPricing,
     ){}
 
     public function createOrder($customer){
@@ -51,7 +53,8 @@ class OrderService
                         throw new \Exception('Product '.$cartItem->productVariant->product->name.' is out of stock.');
                     }
 
-                    $lineTotal = $variant->price * $cartItem->quantity;
+                    $pricing = $this->promotionPricing->priceForVariant($cartItem->productVariant);
+                    $lineTotal = $pricing['price'] * $cartItem->quantity;
                     $total += $lineTotal;
 
                     $order->items()->create([
@@ -60,8 +63,8 @@ class OrderService
                         'size_name' => $cartItem->productVariant->size?->name,
                         'color_name' => $cartItem->productVariant->color?->name,
                         'original_unit_price' => $variant->price,
-                        'discount_amount' => 0,
-                        'unit_price' => $variant->price,
+                        'discount_amount' => $pricing['discount_amount'],
+                        'unit_price' => $pricing['price'],
                         'quantity' => $cartItem->quantity,
                         'total' => $lineTotal,
                     ]);

@@ -2,6 +2,7 @@
 import { watch } from 'vue';
 import { Trash } from 'lucide-vue-next';
 import { type CartProduct } from '@/types';
+import ProductPrice from '@/components/ProductPrice.vue';
 import { router, useForm } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 import {
@@ -75,8 +76,11 @@ const removeFromCart = () => {
                         class="inline-block h-3 w-3 rounded-sm border border-gray-300"
                     />
                 </p>
-                <p class="mt-1 text-sm text-gray-500">
-                    {{ cart_product.price }} €
+                <p class="mt-1 text-sm">
+                    <ProductPrice
+                        :price="cart_product.price"
+                        :original-price="cart_product.original_price"
+                    />
                 </p>
             </div>
 

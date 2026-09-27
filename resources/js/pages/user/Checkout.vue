@@ -4,6 +4,7 @@ import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { type CartProduct as cart_product, type Country, type PageType } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { route } from 'ziggy-js';
+import ProductPrice from '@/components/ProductPrice.vue';
 import {
     Item,
     ItemContent,
@@ -149,7 +150,10 @@ const order = async () => {
                                         </ItemTitle>
                                         <ItemDescription>
                                             {{ product.quantity }}x
-                                            {{ product.price }} €
+                                            <ProductPrice
+                                                :price="product.price"
+                                                :original-price="product.original_price"
+                                            />
                                         </ItemDescription>
                                     </ItemContent>
 

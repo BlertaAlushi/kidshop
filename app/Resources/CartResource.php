@@ -2,6 +2,7 @@
 
 namespace App\Resources;
 
+use App\Services\Products\PromotionPricingService;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CartResource extends JsonResource
@@ -14,6 +15,8 @@ class CartResource extends JsonResource
             : null;
         $image ??= $product->images->firstWhere('is_primary', true) ?? $product->images->first();
 
+        $pricing = resolve(PromotionPricingService::class)->priceForVariant($variant);
+
         return [
             'id' => $this->id,
             'product_variant_id' => $this->product_variant_id,
@@ -22,7 +25,9 @@ class CartResource extends JsonResource
             'size' => $variant->size?->name,
             'color' => $variant->color?->name,
             'color_hex' => $variant->color?->hex_code,
-            'price' => (float) $variant->price,
+            'price' => $pricing['price'],
+            'original_price' => $pricing['original_price'],
+            'promotion' => $pricing['promotion'],
             'quantity' => $this->quantity,
             'image' => $image ? '/storage/'.$image->path : null,
         ];

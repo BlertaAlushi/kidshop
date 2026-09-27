@@ -5,6 +5,7 @@ import { Product, ProductVariantOption } from '@/types';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Label } from '@/components/ui/label';
+import ProductPrice from '@/components/ProductPrice.vue';
 import {
     NumberField,
     NumberFieldContent,
@@ -34,8 +35,18 @@ const defaultVariant = computed<ProductVariantOption | null>(
         ) ?? null,
 );
 
+const requestedColorId = Number(
+    new URLSearchParams(window.location.search).get('color'),
+) || null;
+
 const selectedColorId = ref<number | null>(
-    defaultVariant.value?.color?.id ?? colors.value[0]?.id ?? null,
+    (requestedColorId &&
+        colors.value.some((color) => color.id === requestedColorId)
+        ? requestedColorId
+        : null) ??
+        defaultVariant.value?.color?.id ??
+        colors.value[0]?.id ??
+        null,
 );
 
 const sizesForColor = computed(() => {
@@ -98,6 +109,12 @@ const displayImage = computed(
 
 const displayPrice = computed(
     () => selectedVariant.value?.price ?? props.product.data.price,
+);
+
+const displayOriginalPrice = computed(
+    () =>
+        selectedVariant.value?.original_price ??
+        props.product.data.original_price,
 );
 
 const inStock = computed(
@@ -163,8 +180,12 @@ const addToCart = () => {
                         {{ product.data.name }}
                     </h1>
 
-                    <div class="text-2xl font-semibold text-primary">
-                        {{ displayPrice }} €
+                    <div>
+                        <ProductPrice
+                            :price="displayPrice"
+                            :original-price="displayOriginalPrice"
+                            size="lg"
+                        />
                     </div>
 
                     <div v-if="colors.length" class="flex flex-col gap-2">

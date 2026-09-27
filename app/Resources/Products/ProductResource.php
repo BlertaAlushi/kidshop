@@ -2,14 +2,20 @@
 
 namespace App\Resources\Products;
 
+use App\Services\Products\PromotionPricingService;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ProductResource extends JsonResource
 {
     public function toArray($request)
     {
+        $promotionPricing = resolve(PromotionPricingService::class);
+
         $variants = $this->variants;
         $defaultVariant = $variants?->firstWhere('is_active', true) ?? $variants?->first();
+        $defaultPricing = $defaultVariant
+            ? $promotionPricing->priceFor($this->resource, $defaultVariant->color_id, (float) $defaultVariant->price)
+            : ['price' => null, 'original_price' => null, 'promotion' => null];
 
         $images = $this->images;
         $image = $images?->firstWhere('is_primary', true) ?? $images?->first();
@@ -45,30 +51,40 @@ class ProductResource extends JsonResource
             'category' => $this->whenLoaded('category', fn () => $this->category?->name),
             'brand' => $this->whenLoaded('brand', fn () => $this->brand?->name),
             'image' => $image ? '/storage/'.$image->path : null,
-            'price' => $defaultVariant?->price !== null ? (float) $defaultVariant->price : null,
+            'price' => $defaultPricing['price'],
+            'original_price' => $defaultPricing['original_price'],
+            'promotion' => $defaultPricing['promotion'],
             'stock_quantity' => (int) ($variants?->sum('stock_quantity') ?? 0),
             'default_variant' => $defaultVariant ? [
                 'id' => $defaultVariant->id,
-                'price' => (float) $defaultVariant->price,
+                'price' => $defaultPricing['price'],
+                'original_price' => $defaultPricing['original_price'],
+                'promotion' => $defaultPricing['promotion'],
                 'stock_quantity' => $defaultVariant->stock_quantity,
             ] : null,
             'colors' => $colors ?? [],
-            'variants' => $variants?->map(fn ($variant) => [
-                'id' => $variant->id,
-                'price' => (float) $variant->price,
-                'stock_quantity' => $variant->stock_quantity,
-                'is_active' => (bool) $variant->is_active,
-                'size' => $variant->relationLoaded('size') && $variant->size ? [
-                    'id' => $variant->size->id,
-                    'name' => $variant->size->name,
-                    'sort_order' => $variant->size->sort_order,
-                ] : null,
-                'color' => $variant->relationLoaded('color') && $variant->color ? [
-                    'id' => $variant->color->id,
-                    'name' => $variant->color->name,
-                    'hex_code' => $variant->color->hex_code,
-                ] : null,
-            ])->values() ?? [],
+            'variants' => $variants?->map(function ($variant) use ($promotionPricing) {
+                $pricing = $promotionPricing->priceFor($this->resource, $variant->color_id, (float) $variant->price);
+
+                return [
+                    'id' => $variant->id,
+                    'price' => $pricing['price'],
+                    'original_price' => $pricing['original_price'],
+                    'promotion' => $pricing['promotion'],
+                    'stock_quantity' => $variant->stock_quantity,
+                    'is_active' => (bool) $variant->is_active,
+                    'size' => $variant->relationLoaded('size') && $variant->size ? [
+                        'id' => $variant->size->id,
+                        'name' => $variant->size->name,
+                        'sort_order' => $variant->size->sort_order,
+                    ] : null,
+                    'color' => $variant->relationLoaded('color') && $variant->color ? [
+                        'id' => $variant->color->id,
+                        'name' => $variant->color->name,
+                        'hex_code' => $variant->color->hex_code,
+                    ] : null,
+                ];
+            })->values() ?? [],
         ];
     }
 }

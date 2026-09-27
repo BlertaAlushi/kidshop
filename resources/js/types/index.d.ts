@@ -46,13 +46,41 @@ export interface ProductColorOption {
     images: string[];
 }
 
+export interface PromotionInfo {
+    id: number;
+    name: string;
+    type: 'percentage' | 'fixed';
+    value: number;
+}
+
 export interface ProductVariantOption {
     id: number;
     price: number;
+    original_price: number | null;
+    promotion: PromotionInfo | null;
     stock_quantity: number;
     is_active: boolean;
     size: { id: number; name: string; sort_order: number } | null;
     color: { id: number; name: string; hex_code: string | null } | null;
+}
+
+export interface ProductVariantListItem {
+    id: string;
+    product_id: number;
+    slug: string;
+    name: string;
+    gender: 'boy' | 'girl' | 'unisex';
+    category: string | null;
+    brand: string | null;
+    image: string | null;
+    images: string[];
+    price: number | null;
+    original_price: number | null;
+    promotion: PromotionInfo | null;
+    stock_quantity: number;
+    color: { id: number; name: string; hex_code: string | null } | null;
+    color_id: number | null;
+    colors: { id: number; name: string; hex_code: string | null }[];
 }
 
 export interface Product {
@@ -62,11 +90,19 @@ export interface Product {
     description:string | null;
     gender: 'boy' | 'girl' | 'unisex';
     price: number | null;
+    original_price: number | null;
+    promotion: PromotionInfo | null;
     stock_quantity: number;
     category: string | null;
     brand: string | null;
     image: string | null;
-    default_variant: { id: number; price: number; stock_quantity: number } | null;
+    default_variant: {
+        id: number;
+        price: number;
+        original_price: number | null;
+        promotion: PromotionInfo | null;
+        stock_quantity: number;
+    } | null;
     colors: ProductColorOption[];
     variants: ProductVariantOption[];
 }
@@ -80,6 +116,8 @@ export interface CartProduct {
     color: string | null;
     color_hex: string | null;
     price:number;
+    original_price: number | null;
+    promotion: PromotionInfo | null;
     quantity:number;
     image:string | null;
 }
