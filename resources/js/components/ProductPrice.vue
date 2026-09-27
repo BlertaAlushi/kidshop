@@ -35,13 +35,13 @@ const discountPercent = computed(() => {
         </span>
         <span
             v-if="hasDiscount"
-            class="text-sm text-gray-400 line-through"
+            class="text-sm text-muted-foreground line-through"
         >
             {{ originalPrice }} €
         </span>
         <span
             v-if="hasDiscount"
-            class="rounded-sm bg-red-600 px-1.5 py-0.5 text-xs font-semibold text-white"
+            class="rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white"
         >
             -{{ discountPercent }}%
         </span>

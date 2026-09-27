@@ -110,183 +110,181 @@ const mainNavItems: NavItem[] = [
 </script>
 
 <template>
-    <div>
-        <div>
-            <div class="flex h-20 items-center p-6">
-                <!-- Mobile Menu -->
-                <div class="lg:hidden">
-                    <Sheet>
-                        <SheetTrigger :as-child="true">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                class="mr-2 h-9 w-9"
-                            >
-                                <Menu class="h-5 w-5" />
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent side="left" class="w-75 p-6">
-                            <SheetTitle class="sr-only"
-                                >Navigation Menu</SheetTitle
-                            >
-                            <SheetHeader class="flex justify-start text-left">
-                                <AppLogoIcon
-                                    class="size-6 fill-current text-black dark:text-white"
-                                />
-                            </SheetHeader>
-                            <div
-                                class="flex h-full flex-1 flex-col justify-between space-y-4 py-6"
-                            >
-                                <nav class="-mx-3 space-y-1">
-                                    <Link
-                                        v-for="item in mainNavItems"
-                                        :key="item.title"
-                                        :href="item.href"
-                                        class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent"
-                                        :class="activeItemStyles(item.href)"
-                                    >
-                                        <component
-                                            v-if="item.icon"
-                                            :is="item.icon"
-                                            class="h-5 w-5"
-                                        />
-                                        {{ item.title }}
-                                    </Link>
-                                </nav>
-                            </div>
-                        </SheetContent>
-                    </Sheet>
-                </div>
-
-                <Link :href="route('home')" class="flex items-center gap-x-2">
-                    <AppLogo />
-                </Link>
-
-                <!-- Desktop Menu -->
-                <div class="hidden h-full justify-center lg:flex lg:flex-1">
-                    <NavigationMenu class="flex h-full items-stretch">
-                        <NavigationMenuList
-                            class="flex h-full items-stretch space-x-6"
+    <header
+        class="sticky top-0 z-40 w-full border-b border-border/70 bg-background/85 backdrop-blur-sm"
+    >
+        <div class="mx-auto flex h-18 w-full max-w-7xl items-center px-4 sm:px-6">
+            <!-- Mobile Menu -->
+            <div class="lg:hidden">
+                <Sheet>
+                    <SheetTrigger :as-child="true">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            class="mr-1 h-9 w-9 cursor-pointer"
                         >
-                            <!-- Main nav items -->
-                            <NavigationMenuItem
-                                v-for="(item, index) in mainNavItems"
-                                :key="index"
-                                class="relative flex h-full items-center"
-                            >
+                            <Menu class="h-5 w-5" />
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" class="w-75 p-6">
+                        <SheetTitle class="sr-only"
+                            >Navigation Menu</SheetTitle
+                        >
+                        <SheetHeader class="flex justify-start text-left">
+                            <AppLogoIcon
+                                class="size-6 fill-current text-foreground"
+                            />
+                        </SheetHeader>
+                        <div
+                            class="flex h-full flex-1 flex-col justify-between space-y-4 py-6"
+                        >
+                            <nav class="-mx-3 space-y-1">
                                 <Link
-                                    :class="[
-                                        navigationMenuTriggerStyle(),
-                                        activeItemStyles(item.href),
-                                        'h-9 cursor-pointer px-3',
-                                    ]"
+                                    v-for="item in mainNavItems"
+                                    :key="item.title"
                                     :href="item.href"
+                                    class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent"
+                                    :class="activeItemStyles(item.href)"
                                 >
                                     <component
                                         v-if="item.icon"
                                         :is="item.icon"
-                                        class="mr-2 h-4 w-4"
+                                        class="h-5 w-5"
                                     />
                                     {{ item.title }}
                                 </Link>
+                            </nav>
+                        </div>
+                    </SheetContent>
+                </Sheet>
+            </div>
 
-                                <div
-                                    v-if="isCurrentRoute(item.href)"
-                                    class="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"
-                                ></div>
-                            </NavigationMenuItem>
+            <Link
+                :href="route('home')"
+                class="flex shrink-0 items-center gap-x-2"
+            >
+                <AppLogo />
+            </Link>
 
-                            <NavigationMenuItem
-                                v-for="menuItem in menu"
-                                :key="menuItem.key"
-                                class="relative flex h-full items-center"
+            <!-- Desktop Menu -->
+            <div class="hidden h-full flex-1 justify-center lg:flex">
+                <NavigationMenu class="flex h-full items-stretch">
+                    <NavigationMenuList
+                        class="flex h-full items-stretch gap-x-1"
+                    >
+                        <!-- Main nav items -->
+                        <NavigationMenuItem
+                            v-for="(item, index) in mainNavItems"
+                            :key="index"
+                            class="relative flex h-full items-center"
+                        >
+                            <Link
+                                :class="[
+                                    navigationMenuTriggerStyle(),
+                                    activeItemStyles(item.href),
+                                    'h-9 cursor-pointer bg-transparent px-3 font-medium',
+                                ]"
+                                :href="item.href"
                             >
-                                <NavigationMenuTrigger>{{
-                                    menuItem.title
-                                }}</NavigationMenuTrigger>
-                                <NavigationMenuContent>
-                                    <ul class="grid w-50 gap-4">
-                                        <li>
-                                            <NavigationMenuLink
-                                                v-for="item in menuItem.items"
-                                                :key="item.slug"
-                                                as-child
+                                <component
+                                    v-if="item.icon"
+                                    :is="item.icon"
+                                    class="mr-2 h-4 w-4"
+                                />
+                                {{ item.title }}
+                            </Link>
+
+                            <div
+                                v-if="isCurrentRoute(item.href)"
+                                class="absolute bottom-1 left-3 h-0.5 w-[calc(100%-1.5rem)] rounded-full bg-foreground"
+                            ></div>
+                        </NavigationMenuItem>
+
+                        <NavigationMenuItem
+                            v-for="menuItem in menu"
+                            :key="menuItem.key"
+                            class="relative flex h-full items-center"
+                        >
+                            <NavigationMenuTrigger
+                                class="bg-transparent font-medium"
+                                >{{ menuItem.title }}</NavigationMenuTrigger
+                            >
+                            <NavigationMenuContent>
+                                <ul class="grid w-50 gap-1 p-2">
+                                    <li v-for="item in menuItem.items" :key="item.slug">
+                                        <NavigationMenuLink as-child>
+                                            <a
+                                                :href="
+                                                    route(
+                                                        menuItem.url,
+                                                        item.slug,
+                                                    )
+                                                "
+                                                class="block rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent"
+                                                >{{ item.name }}</a
                                             >
-                                                <a
-                                                    :href="
-                                                        route(
-                                                            menuItem.url,
-                                                            item.slug,
-                                                        )
-                                                    "
-                                                    >{{ item.name }}</a
-                                                >
-                                            </NavigationMenuLink>
-                                        </li>
-                                    </ul>
-                                </NavigationMenuContent>
-                            </NavigationMenuItem>
-                        </NavigationMenuList>
-                    </NavigationMenu>
-                </div>
+                                        </NavigationMenuLink>
+                                    </li>
+                                </ul>
+                            </NavigationMenuContent>
+                        </NavigationMenuItem>
+                    </NavigationMenuList>
+                </NavigationMenu>
+            </div>
 
-                <div class="ml-auto flex items-center space-x-2">
-                    <div class="relative flex items-center space-x-1">
-                        <Link
-                            key="cart"
-                            :href="route('cart.index')"
-                            class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent"
-                            :class="activeItemStyles(route('cart.index'))"
-                        >
-                            <div class="relative">
-                                <component :is="ShoppingBag" class="h-5 w-5" />
+            <div class="ml-auto flex items-center gap-1">
+                <Link
+                    key="cart"
+                    :href="route('cart.index')"
+                    class="relative flex items-center rounded-full p-2.5 transition-colors hover:bg-accent"
+                    :class="activeItemStyles(route('cart.index'))"
+                >
+                    <ShoppingBag class="h-5 w-5" />
 
-                                <span v-if="cartProductCount>0"
-                                    class="absolute -top-2 -right-2 flex h-5 min-w-4.5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white"
-                                >
-                                    {{ cartProductCount }}
-                                </span>
-                            </div>
-                        </Link>
-                        <DropdownMenu v-if="auth.user">
-                            <DropdownMenuTrigger :as-child="true">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    class="relative size-10 w-auto rounded-full p-1 focus-within:ring-2 focus-within:ring-primary"
-                                >
-                                    <Avatar
-                                        class="size-8 overflow-hidden rounded-full"
-                                    >
-                                        <AvatarImage
-                                            v-if="auth.user.avatar"
-                                            :src="auth.user.avatar"
-                                            :alt="auth.user.name"
-                                        />
-                                        <AvatarFallback
-                                            class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white"
-                                        >
-                                            {{ getInitials(auth.user?.name) }}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" class="w-56">
-                                <UserMenuContent :user="auth.user" />
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                        <Link
-                            v-else
-                            key="login"
-                            :href="route('login')"
-                            class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent"
-                            :class="activeItemStyles(route('login'))"
+                    <span
+                        v-if="cartProductCount > 0"
+                        class="absolute top-0.5 right-0.5 flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white"
+                    >
+                        {{ cartProductCount }}
+                    </span>
+                </Link>
+                <DropdownMenu v-if="auth.user">
+                    <DropdownMenuTrigger :as-child="true">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            class="relative size-10 w-auto cursor-pointer rounded-full p-1 focus-within:ring-2 focus-within:ring-primary"
                         >
-                            <component :is="UserRound" class="h-5 w-5" />
-                        </Link>
-                    </div>
-                </div>
+                            <Avatar
+                                class="size-8 overflow-hidden rounded-full"
+                            >
+                                <AvatarImage
+                                    v-if="auth.user.avatar"
+                                    :src="auth.user.avatar"
+                                    :alt="auth.user.name"
+                                />
+                                <AvatarFallback
+                                    class="rounded-full bg-secondary font-semibold text-secondary-foreground"
+                                >
+                                    {{ getInitials(auth.user?.name) }}
+                                </AvatarFallback>
+                            </Avatar>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" class="w-56">
+                        <UserMenuContent :user="auth.user" />
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                <Link
+                    v-else
+                    key="login"
+                    :href="route('login')"
+                    class="flex items-center rounded-full p-2.5 transition-colors hover:bg-accent"
+                    :class="activeItemStyles(route('login'))"
+                >
+                    <UserRound class="h-5 w-5" />
+                </Link>
             </div>
         </div>
-    </div>
+    </header>
 </template>

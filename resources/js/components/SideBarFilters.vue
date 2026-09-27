@@ -94,34 +94,31 @@ watch(
 </script>
 
 <template>
-    <aside class="sticky h-screen shrink-0 overflow-y-auto">
+    <aside class="h-fit w-full shrink-0 lg:sticky lg:top-24">
         <div v-for="group in filterGroups" :key="group.key">
-            <div v-if="group.items.length" class="mb-4">
+            <div v-if="group.items.length" class="mb-5">
                 <button
                     @click="openGroups[group.key] = !openGroups[group.key]"
-                    :class="[
-                        'mb-3 flex w-full items-center justify-between pb-2 font-medium',
-                        openGroups[group.key] ? 'border-b border-gray-900' : '',
-                    ]"
+                    class="mb-3 flex w-full items-center justify-between border-b border-border pb-2 text-sm font-semibold"
                 >
                     {{ group.title }}
                     <component
                         :is="openGroups[group.key] ? ChevronUp : ChevronDown"
-                        class="h-4 w-4 transition-transform duration-200"
+                        class="h-4 w-4 text-muted-foreground transition-transform duration-200"
                     />
                 </button>
 
-                <div v-show="openGroups[group.key]" class="space-y-2 pl-2">
+                <div v-show="openGroups[group.key]" class="space-y-2.5">
                     <label
                         v-for="item in group.items"
                         :key="item.id"
-                        class="flex cursor-pointer items-center gap-2"
+                        class="flex cursor-pointer items-center gap-2.5 text-muted-foreground transition-colors hover:text-foreground"
                     >
                         <input
                             type="checkbox"
                             :value="item.id"
                             v-model="form[group.key]"
-                            class="h-4 w-4 accent-black"
+                            class="h-4 w-4 cursor-pointer rounded border-input accent-foreground"
                         />
                         <span class="text-sm">{{ item.name }}</span>
                     </label>
@@ -132,30 +129,27 @@ watch(
         <div>
             <button
                 @click="openGroups.gender = !openGroups.gender"
-                :class="[
-                    'mb-3 flex w-full items-center justify-between pb-2 font-medium',
-                    openGroups.gender ? 'border-b border-gray-900' : '',
-                ]"
+                class="mb-3 flex w-full items-center justify-between border-b border-border pb-2 text-sm font-semibold"
             >
                 {{ t('home.gender') }}
                 <component
                     :is="openGroups.gender ? ChevronUp : ChevronDown"
-                    class="h-4 w-4 transition-transform duration-200"
+                    class="h-4 w-4 text-muted-foreground transition-transform duration-200"
                 />
             </button>
 
-            <div v-show="openGroups.gender" class="space-y-2 pl-2">
+            <div v-show="openGroups.gender" class="space-y-2.5">
                 <label
                     v-for="option in genderOptions"
                     :key="option.value"
-                    class="flex cursor-pointer items-center gap-2"
+                    class="flex cursor-pointer items-center gap-2.5 text-muted-foreground transition-colors hover:text-foreground"
                 >
                     <input
                         type="radio"
                         name="gender"
                         :value="option.value"
                         v-model="form.gender"
-                        class="h-4 w-4 accent-black"
+                        class="h-4 w-4 cursor-pointer border-input accent-foreground"
                     />
                     <span class="text-sm">{{ option.label }}</span>
                 </label>
@@ -165,14 +159,9 @@ watch(
 </template>
 
 <style scoped>
-aside {
-    min-width: 250px;
-}
-button {
-    cursor: pointer;
-    transition: color 0.2s;
-}
-label input {
-    cursor: pointer;
+@media (min-width: 1024px) {
+    aside {
+        width: 220px;
+    }
 }
 </style>

@@ -36,6 +36,8 @@
     "quantity": "Quantity",
     "select_color": "Select color",
     "select_size": "Select size",
+    "previous_image": "Previous image",
+    "next_image": "Next image",
     "out_of_stock": "Out of stock",
     "order": "Finish Order",
     "checkout": "Checkout",

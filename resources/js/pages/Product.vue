@@ -16,6 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { route } from 'ziggy-js';
+import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
 
 const { t } = useI18n();
 
@@ -107,6 +108,19 @@ const displayImage = computed(
     () => galleryImages.value[selectedImageIndex.value] ?? props.product.data.image,
 );
 
+const showPrevImage = () => {
+    if (!galleryImages.value.length) return;
+    selectedImageIndex.value =
+        (selectedImageIndex.value - 1 + galleryImages.value.length) %
+        galleryImages.value.length;
+};
+
+const showNextImage = () => {
+    if (!galleryImages.value.length) return;
+    selectedImageIndex.value =
+        (selectedImageIndex.value + 1) % galleryImages.value.length;
+};
+
 const displayPrice = computed(
     () => selectedVariant.value?.price ?? props.product.data.price,
 );
@@ -141,14 +155,37 @@ const addToCart = () => {
     <Head :title="t('home.product')" />
 
     <AppLayout>
-        <div class="min-h-screen bg-slate-50 px-10 py-12">
-            <div class="grid grid-cols-1 items-start gap-16 md:grid-cols-2">
+        <div class="mx-auto w-full max-w-7xl px-6 py-12">
+            <div class="grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-16">
                 <div>
-                    <img
-                        :src="displayImage"
-                        :alt="product.data.name"
-                        class="h-150 w-full object-cover md:h-200"
-                    />
+                    <div
+                        class="group relative aspect-square w-full overflow-hidden rounded-2xl bg-muted"
+                    >
+                        <img
+                            :src="displayImage"
+                            :alt="product.data.name"
+                            class="h-full w-full object-cover"
+                        />
+
+                        <template v-if="galleryImages.length > 1">
+                            <button
+                                type="button"
+                                :aria-label="t('home.previous_image')"
+                                class="absolute top-1/2 left-3 flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-background/80 text-foreground opacity-0 shadow transition hover:bg-background group-hover:opacity-100 focus-visible:opacity-100"
+                                @click="showPrevImage"
+                            >
+                                <ChevronLeft class="size-5" />
+                            </button>
+                            <button
+                                type="button"
+                                :aria-label="t('home.next_image')"
+                                class="absolute top-1/2 right-3 flex size-9 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-background/80 text-foreground opacity-0 shadow transition hover:bg-background group-hover:opacity-100 focus-visible:opacity-100"
+                                @click="showNextImage"
+                            >
+                                <ChevronRight class="size-5" />
+                            </button>
+                        </template>
+                    </div>
 
                     <div
                         v-if="galleryImages.length > 1"
@@ -158,7 +195,7 @@ const addToCart = () => {
                             v-for="(image, index) in galleryImages"
                             :key="image"
                             type="button"
-                            class="size-20 shrink-0 cursor-pointer overflow-hidden rounded-md border-2 transition"
+                            class="size-20 shrink-0 cursor-pointer overflow-hidden rounded-xl border-2 transition"
                             :class="
                                 selectedImageIndex === index
                                     ? 'border-primary'
@@ -175,8 +212,8 @@ const addToCart = () => {
                     </div>
                 </div>
 
-                <div class="flex h-full flex-col justify-center gap-6 pr-48">
-                    <h1 class="text-3xl font-bold tracking-tight">
+                <div class="flex h-full max-w-md flex-col gap-6">
+                    <h1 class="text-3xl font-semibold tracking-tight">
                         {{ product.data.name }}
                     </h1>
 
@@ -196,17 +233,22 @@ const addToCart = () => {
                                 :key="color.id"
                                 type="button"
                                 :title="color.name"
-                                class="size-8 cursor-pointer rounded-sm border-2 transition"
+                                class="size-8 cursor-pointer rounded-full transition-transform hover:scale-110 focus-visible:outline-none"
                                 :class="
                                     selectedColorId === color.id
-                                        ? 'border-primary'
-                                        : 'border-black/10'
+                                        ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+                                        : 'ring-1 ring-border ring-offset-2 ring-offset-background hover:ring-primary/50'
                                 "
-                                :style="{
-                                    backgroundColor: color.hex_code ?? '#e5e5e5',
-                                }"
                                 @click="selectVariant(color.id)"
-                            />
+                            >
+                                <span
+                                    class="block size-full rounded-full"
+                                    :style="{
+                                        backgroundColor:
+                                            color.hex_code ?? '#e5e5e5',
+                                    }"
+                                />
+                            </button>
                         </div>
                     </div>
 
@@ -217,11 +259,11 @@ const addToCart = () => {
                                 v-for="size in sizesForColor"
                                 :key="size.id"
                                 type="button"
-                                class="min-w-10 cursor-pointer rounded-md border px-3 py-1.5 text-sm transition"
+                                class="min-w-11 cursor-pointer rounded-full border px-3.5 py-1.5 text-sm transition"
                                 :class="
                                     selectedSizeId === size.id
                                         ? 'border-primary bg-primary text-primary-foreground'
-                                        : 'border-black/10'
+                                        : 'border-border hover:border-foreground/40'
                                 "
                                 @click="selectedSizeId = size.id"
                             >
@@ -230,7 +272,10 @@ const addToCart = () => {
                         </div>
                     </div>
 
-                    <p v-if="selectedVariant && !inStock" class="text-sm text-red-500">
+                    <p
+                        v-if="selectedVariant && !inStock"
+                        class="text-sm font-medium text-red-500"
+                    >
                         {{ t('home.out_of_stock') }}
                     </p>
 
@@ -251,7 +296,8 @@ const addToCart = () => {
                     </NumberField>
 
                     <Button
-                        class="w-full"
+                        class="w-full rounded-full"
+                        size="lg"
                         :disabled="!selectedVariant || !inStock"
                         @click="addToCart"
                     >
@@ -270,13 +316,13 @@ const addToCart = () => {
                             </TabsList>
                             <TabsContent
                                 value="description"
-                                class="rounded-lg bg-white p-6 shadow-sm"
+                                class="rounded-xl border border-border/70 bg-card p-6 text-sm text-muted-foreground"
                             >
                                 {{ product.data.description }}
                             </TabsContent>
                             <TabsContent
                                 value="brand"
-                                class="rounded-lg bg-white p-6 shadow-sm"
+                                class="rounded-xl border border-border/70 bg-card p-6 text-sm text-muted-foreground"
                             >
                                 {{ product.data.brand }}
                             </TabsContent>

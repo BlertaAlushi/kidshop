@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/UserLayout.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { type CartProduct as cart_product, type Country, type PageType } from '@/types';
 import { useI18n } from 'vue-i18n';
@@ -98,9 +98,9 @@ const order = async () => {
     <Head :title="t('home.checkout')" />
 
     <AppLayout>
-        <div v-if="success" class="mt-20 flex justify-center">
+        <div v-if="success" class="flex justify-center px-6 py-24">
             <Alert
-                class="flex w-full max-w-md items-center gap-3 rounded-lg border border-green-600 bg-white p-6 text-green-600 shadow-lg"
+                class="flex w-full max-w-md items-center gap-3 rounded-2xl border border-green-600/30 bg-card p-6 text-green-600 shadow-sm"
             >
                 <CheckCircle class="h-6 w-6" />
                 <div>
@@ -110,8 +110,8 @@ const order = async () => {
                 </div>
             </Alert>
         </div>
-        <div v-else class="flex min-h-screen justify-center bg-slate-50 py-12">
-            <div class="w-full max-w-6xl px-10">
+        <div v-else class="flex justify-center px-6 py-12">
+            <div class="w-full max-w-6xl">
                 <div class="grid grid-cols-1 items-start gap-16 md:grid-cols-2">
                     <div class="mx-auto flex w-full max-w-md flex-col gap-6">
                         <Alert
@@ -140,7 +140,7 @@ const order = async () => {
                                             :alt="product.name"
                                             width="32"
                                             height="32"
-                                            class="object-cover grayscale"
+                                            class="object-cover"
                                         />
                                     </ItemMedia>
 
@@ -223,7 +223,7 @@ const order = async () => {
                     </div>
 
                     <div class="mx-auto flex w-full max-w-xl flex-col gap-6">
-                        <Card class="w-full">
+                        <Card class="w-full rounded-2xl border-border/70 shadow-sm">
                             <CardHeader>
                                 <CardTitle>
                                     {{ t('home.address.customer') }}
@@ -330,7 +330,8 @@ const order = async () => {
                         </Card>
 
                         <Button
-                            class="w-full cursor-pointer"
+                            class="w-full cursor-pointer rounded-full"
+                            size="lg"
                             :disabled="form.processing"
                             @click="order"
                         >

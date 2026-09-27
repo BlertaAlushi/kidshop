@@ -103,68 +103,77 @@ function toggleSearch() {
 <template>
     <Head title="Products" />
     <AppLayout>
-        <div class="flex gap-x-14 p-8">
+        <div
+            class="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-10 lg:flex-row lg:gap-x-10"
+        >
             <SideBarFilters
                 :filters="form"
                 :filterOptions="filterOptions"
                 @update:filters="(update) => Object.assign(form, update)"
             />
-            <main class="flex flex-1 flex-col gap-y-10">
-                <div class="ml-auto flex gap-3">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        class="group h-9 w-9 cursor-pointer"
-                        @click="toggleSearch"
-                    >
-                        <Search
-                            class="size-5 opacity-80 group-hover:opacity-100"
-                        />
-                    </Button>
-                    <Select v-model="form.order_by">
-                        <SelectTrigger class="w-45">
-                            <SelectValue :placeholder="t('home.order_by')" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectLabel>{{
-                                    t('home.order_by')
-                                }}</SelectLabel>
-                                <SelectItem value="availability">
-                                    {{ t('home.availability') }}
-                                </SelectItem>
-                                <SelectItem value="price_high_to_low">
-                                    {{ t('home.price_high_to_low') }}
-                                </SelectItem>
-                                <SelectItem value="price_low_to_high">
-                                    {{ t('home.price_low_to_high') }}
-                                </SelectItem>
-                                <SelectItem value="date_new_to_old">
-                                    {{ t('home.date_new_to_old') }}
-                                </SelectItem>
-                                <SelectItem value="date_old_to_new">
-                                    {{ t('home.date_old_to_new') }}
-                                </SelectItem>
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                    <Select v-model="form.per_page">
-                        <SelectTrigger class="w-45">
-                            <SelectValue
-                                :placeholder="t('home.show_per_page')"
+            <main class="flex flex-1 flex-col gap-y-8">
+                <div
+                    class="flex flex-wrap items-center justify-between gap-3"
+                >
+                    <h1 class="text-xl font-semibold tracking-tight">
+                        {{ t('home.products') }}
+                    </h1>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            class="group h-9 w-9 cursor-pointer rounded-full"
+                            @click="toggleSearch"
+                        >
+                            <Search
+                                class="size-5 opacity-80 group-hover:opacity-100"
                             />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectLabel>{{
-                                    t('home.show_per_page')
-                                }}</SelectLabel>
-                                <SelectItem value="12"> 12 </SelectItem>
-                                <SelectItem value="24"> 24 </SelectItem>
-                                <SelectItem value="48"> 48 </SelectItem>
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
+                        </Button>
+                        <Select v-model="form.order_by">
+                            <SelectTrigger class="w-45">
+                                <SelectValue :placeholder="t('home.order_by')" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>{{
+                                        t('home.order_by')
+                                    }}</SelectLabel>
+                                    <SelectItem value="availability">
+                                        {{ t('home.availability') }}
+                                    </SelectItem>
+                                    <SelectItem value="price_high_to_low">
+                                        {{ t('home.price_high_to_low') }}
+                                    </SelectItem>
+                                    <SelectItem value="price_low_to_high">
+                                        {{ t('home.price_low_to_high') }}
+                                    </SelectItem>
+                                    <SelectItem value="date_new_to_old">
+                                        {{ t('home.date_new_to_old') }}
+                                    </SelectItem>
+                                    <SelectItem value="date_old_to_new">
+                                        {{ t('home.date_old_to_new') }}
+                                    </SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                        <Select v-model="form.per_page">
+                            <SelectTrigger class="w-32">
+                                <SelectValue
+                                    :placeholder="t('home.show_per_page')"
+                                />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>{{
+                                        t('home.show_per_page')
+                                    }}</SelectLabel>
+                                    <SelectItem value="12"> 12 </SelectItem>
+                                    <SelectItem value="24"> 24 </SelectItem>
+                                    <SelectItem value="48"> 48 </SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
                 <SearchOverlay
                     v-if="searchOpen"
@@ -173,8 +182,11 @@ function toggleSearch() {
                 />
                 <div v-if="products.data.length" class="flex flex-col gap-y-10">
                     <div class="flex flex-col gap-6">
-                        <ItemGroup class="grid grid-cols-4 gap-6">
+                        <ItemGroup
+                            class="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3"
+                        >
                             <Item
+                                class="group gap-3 border-none p-0"
                                 v-for="item in products.data"
                                 :key="item.id"
                                 variant="outline"
@@ -187,17 +199,21 @@ function toggleSearch() {
                                         (item.color ? `?color=${item.color.id}` : '')
                                     "
                                 >
-                                    <ItemHeader class="flex-col items-start justify-start">
-                                        <img
-                                            :src="item.image"
-                                            :alt="item.name"
-                                            width="128"
-                                            height="128"
-                                            class="aspect-square w-full rounded-sm object-cover"
-                                        />
+                                    <ItemHeader class="flex-col items-start justify-start gap-0">
+                                        <div
+                                            class="aspect-square w-full overflow-hidden rounded-2xl bg-muted"
+                                        >
+                                            <img
+                                                :src="item.image"
+                                                :alt="item.name"
+                                                width="256"
+                                                height="256"
+                                                class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                            />
+                                        </div>
                                         <div
                                             v-if="item.colors?.length"
-                                            class="mt-2 flex flex-wrap items-center gap-1.5"
+                                            class="mt-3 flex flex-wrap items-center gap-1.5"
                                         >
                                             <span
                                                 v-for="color in item.colors"
@@ -205,11 +221,11 @@ function toggleSearch() {
                                                 :title="color.name"
                                                 role="button"
                                                 tabindex="0"
-                                                class="size-6 shrink-0 cursor-pointer rounded-sm border-2 transition"
+                                                class="size-4 shrink-0 cursor-pointer rounded-full transition-transform hover:scale-110"
                                                 :class="
                                                     item.color?.id === color.id
-                                                        ? 'border-primary'
-                                                        : 'border-black/10'
+                                                        ? 'ring-2 ring-primary ring-offset-2 ring-offset-background'
+                                                        : 'ring-1 ring-border hover:ring-primary/50'
                                                 "
                                                 :style="{
                                                     backgroundColor:
@@ -227,8 +243,8 @@ function toggleSearch() {
                                             />
                                         </div>
                                     </ItemHeader>
-                                    <ItemContent>
-                                        <ItemTitle>{{
+                                    <ItemContent class="px-0.5">
+                                        <ItemTitle class="text-sm font-medium">{{
                                             item.name
                                         }}</ItemTitle>
                                         <ItemDescription>
@@ -242,10 +258,11 @@ function toggleSearch() {
                             </Item>
                         </ItemGroup>
                     </div>
-                    <div class="ml-auto flex gap-2">
+                    <div class="ml-auto flex items-center gap-2">
                         <Button
                             size="sm"
                             variant="outline"
+                            class="rounded-full"
                             :disabled="!products.links.prev"
                             @click="
                                 products.links.prev &&
@@ -259,6 +276,7 @@ function toggleSearch() {
                             v-if="products.meta.current_page !== 1"
                             size="sm"
                             variant="outline"
+                            class="rounded-full"
                             @click="
                                 products.links.first &&
                                 router.get(products.links.first)
@@ -267,10 +285,14 @@ function toggleSearch() {
                             1
                         </Button>
 
-                        <Ellipsis v-if="products.meta.current_page > 2" />
+                        <Ellipsis
+                            v-if="products.meta.current_page > 2"
+                            class="size-4 text-muted-foreground"
+                        />
 
                         <Button
                             size="sm"
+                            class="rounded-full"
                             @click="
                                 products.meta.links[products.meta.current_page]
                                     .url &&
@@ -289,6 +311,7 @@ function toggleSearch() {
                                 products.meta.current_page <
                                 products.meta.last_page - 1
                             "
+                            class="size-4 text-muted-foreground"
                         />
 
                         <Button
@@ -298,6 +321,7 @@ function toggleSearch() {
                             "
                             size="sm"
                             variant="outline"
+                            class="rounded-full"
                             @click="
                                 products.links.last &&
                                 router.get(products.links.last)
@@ -309,6 +333,7 @@ function toggleSearch() {
                         <Button
                             size="sm"
                             variant="outline"
+                            class="rounded-full"
                             :disabled="!products.links.next"
                             @click="
                                 products.links.next &&
@@ -321,7 +346,7 @@ function toggleSearch() {
                 </div>
                 <div v-else>
                     <Empty
-                        class="h-full bg-linear-to-b from-muted/50 from-30% to-background"
+                        class="rounded-2xl border border-border/70 bg-card/50 py-16"
                     >
                         <EmptyHeader>
                             <EmptyTitle>{{ t('home.no_products') }}</EmptyTitle>

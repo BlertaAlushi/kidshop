@@ -2,13 +2,15 @@
 import AppContent from '@/components/AppContent.vue';
 import AppHeader from '@/components/AppHeader.vue';
 import AppShell from '@/components/AppShell.vue';
+import StoreFooter from '@/components/StoreFooter.vue';
 </script>
 
 <template>
-    <AppShell class="flex-col">
+    <AppShell class="storefront min-h-screen flex-col bg-background">
         <AppHeader />
-        <AppContent>
+        <AppContent class="w-full flex-1">
             <slot />
         </AppContent>
+        <StoreFooter />
     </AppShell>
 </template>

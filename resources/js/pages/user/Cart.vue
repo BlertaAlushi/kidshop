@@ -31,12 +31,15 @@ const checkOut = () => {
     <Head :title="t('home.cart')" />
 
     <AppLayout>
-        <div class="w-full p-8 md:p-20">
+        <div class="mx-auto w-full max-w-5xl px-6 py-12">
+            <h1 class="mb-8 text-2xl font-semibold tracking-tight">
+                {{ t('home.cart') }}
+            </h1>
             <div
                 v-if="props.cartItems.data.length > 0"
                 class="flex flex-col items-start gap-10 md:flex-row"
             >
-                <div class="flex-1 justify-items-center space-y-6">
+                <div class="w-full flex-1 divide-y divide-border">
                     <CartProduct
                         v-for="product in props.cartItems.data"
                         :key="product.id"
@@ -45,25 +48,31 @@ const checkOut = () => {
                 </div>
 
                 <div
-                    class="flex w-full flex-col gap-4 rounded-xl bg-slate-50 p-6 md:w-64 dark:bg-gray-900"
+                    class="flex w-full flex-col gap-4 rounded-2xl border border-border/70 bg-card p-6 md:w-72"
                 >
                     <p class="text-sm font-semibold">
                         {{ t('home.subtotal') }}
                     </p>
-                    <p class="text-lg font-bold">
+                    <p class="text-2xl font-semibold">
                         {{ cartTotalPrice.toFixed(2) }} €
                     </p>
-                    <p class="text-sm text-gray-500">
+                    <p class="text-sm text-muted-foreground">
                         {{ t('home.checkout_description') }}
                     </p>
-                    <Button class="mt-4 w-full" @click="checkOut">
+                    <Button
+                        class="mt-4 w-full rounded-full"
+                        size="lg"
+                        @click="checkOut"
+                    >
                         {{ t('home.checkout') }}
                     </Button>
                 </div>
             </div>
 
             <div v-else>
-                <Empty class="rounded-xl border bg-muted/30 py-16">
+                <Empty
+                    class="rounded-2xl border border-border/70 bg-card/50 py-16"
+                >
                     <EmptyHeader>
                         <EmptyTitle>{{ t('home.no_products') }}</EmptyTitle>
                         <EmptyDescription>

@@ -114,6 +114,7 @@ export interface CartProduct {
     name:string;
     size: string | null;
     color: string | null;
+    color_id: number | null;
     color_hex: string | null;
     price:number;
     original_price: number | null;

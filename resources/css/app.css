@@ -162,6 +162,52 @@
     --sidebar: hsl(240 5.9% 10%);
 }
 
+/*
+  Customer-facing storefront theme (home, collections, product, cart,
+  checkout, auth). Scoped to `.storefront` so the admin side keeps the
+  default design-system tokens untouched.
+*/
+.storefront {
+    --background: hsl(30 25% 98%);
+    --foreground: hsl(240 10% 12%);
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(240 10% 12%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(240 10% 12%);
+    --primary: hsl(240 10% 12%);
+    --primary-foreground: hsl(0 0% 98%);
+    --secondary: hsl(30 20% 94.5%);
+    --secondary-foreground: hsl(240 10% 12%);
+    --muted: hsl(30 20% 95.5%);
+    --muted-foreground: hsl(240 5% 45%);
+    --accent: hsl(30 20% 94.5%);
+    --accent-foreground: hsl(240 10% 12%);
+    --border: hsl(240 8% 90%);
+    --input: hsl(240 8% 88%);
+    --ring: hsl(240 10% 25%);
+    --radius: 0.9rem;
+}
+
+.dark .storefront {
+    --background: hsl(240 12% 6.5%);
+    --foreground: hsl(0 0% 96%);
+    --card: hsl(240 10% 9.5%);
+    --card-foreground: hsl(0 0% 96%);
+    --popover: hsl(240 10% 9.5%);
+    --popover-foreground: hsl(0 0% 96%);
+    --primary: hsl(0 0% 96%);
+    --primary-foreground: hsl(240 10% 10%);
+    --secondary: hsl(240 8% 15%);
+    --secondary-foreground: hsl(0 0% 96%);
+    --muted: hsl(240 8% 14%);
+    --muted-foreground: hsl(240 5% 65%);
+    --accent: hsl(240 8% 16%);
+    --accent-foreground: hsl(0 0% 96%);
+    --border: hsl(240 8% 18%);
+    --input: hsl(240 8% 18%);
+    --ring: hsl(0 0% 80%);
+}
+
 @layer base {
     * {
         @apply border-border outline-ring/50;

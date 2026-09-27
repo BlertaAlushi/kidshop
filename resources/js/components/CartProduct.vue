@@ -14,10 +14,18 @@ import {
 } from '@/components/ui/number-field';
 import { Button } from '@/components/ui/button';
 import { debounce } from 'lodash-es';
+import { computed } from 'vue';
 
 const props = defineProps<{
     cart_product: CartProduct;
 }>();
+
+const productHref = computed(() =>
+    props.cart_product.color_id
+        ? route('collection.product', props.cart_product.product_slug) +
+          `?color=${props.cart_product.color_id}`
+        : route('collection.product', props.cart_product.product_slug),
+);
 
 interface UpdateCartItem {
     quantity: number;
@@ -44,39 +52,40 @@ const removeFromCart = () => {
 </script>
 
 <template>
-    <div class="w-2/3 flex gap-4 border-b border-gray-200 py-8 dark:border-gray-700">
-        <a :href="route('collection.product', cart_product.product_slug)">
+    <div class="flex gap-4 py-6 first:pt-0">
+        <a
+            :href="productHref"
+            class="shrink-0 overflow-hidden rounded-xl bg-muted"
+        >
             <img
                 v-if="cart_product.image"
                 :src="cart_product.image"
                 :alt="cart_product.name"
-                class="h-36 w-36 object-cover md:h-36 md:w-36"
+                class="h-28 w-28 object-cover"
             />
         </a>
 
         <div class="flex flex-1 flex-col justify-between">
             <div>
-                <h3
-                    class="text-sm font-medium text-gray-900 dark:text-gray-100"
-                >
-                    <a :href="route('collection.product', cart_product.product_slug)">
+                <h3 class="text-sm font-medium">
+                    <a :href="productHref">
                         {{ cart_product.name }}
                     </a>
                 </h3>
                 <p
                     v-if="cart_product.size || cart_product.color"
-                    class="flex items-center gap-1 text-xs text-gray-500"
+                    class="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground"
                 >
                     <span v-if="cart_product.size">{{ cart_product.size }}</span>
-                    <span v-if="cart_product.size && cart_product.color"> / </span>
+                    <span v-if="cart_product.size && cart_product.color">/</span>
                     <span
                         v-if="cart_product.color"
                         :title="cart_product.color"
                         :style="{ backgroundColor: cart_product.color_hex ?? undefined }"
-                        class="inline-block h-3 w-3 rounded-sm border border-gray-300"
+                        class="inline-block h-3 w-3 rounded-full border border-black/10"
                     />
                 </p>
-                <p class="mt-1 text-sm">
+                <p class="mt-1.5 text-sm">
                     <ProductPrice
                         :price="cart_product.price"
                         :original-price="cart_product.original_price"
@@ -84,7 +93,7 @@ const removeFromCart = () => {
                 </p>
             </div>
 
-            <div class="mt-4 flex items-center justify-between">
+            <div class="mt-4 flex items-center justify-between gap-3">
                 <NumberField
                     id="quantity"
                     :min="1"
@@ -106,7 +115,7 @@ const removeFromCart = () => {
                 <Button
                     variant="ghost"
                     size="icon"
-                    class="h-8 w-8 text-gray-400 hover:text-red-500"
+                    class="h-8 w-8 shrink-0 cursor-pointer text-muted-foreground hover:text-red-500"
                     @click="removeFromCart"
                 >
                     <Trash class="size-4" />
