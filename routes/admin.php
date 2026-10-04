@@ -5,6 +5,8 @@ use App\Http\Controllers\Admin\ColorsController;
 use App\Http\Controllers\Admin\CountriesController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\Admin\HomeSettingsController;
+use App\Http\Controllers\Admin\OrdersController;
 use App\Http\Controllers\Admin\ProductsController;
 use App\Http\Controllers\Admin\PromotionsController;
 use App\Http\Controllers\Admin\SizesController;
@@ -61,5 +63,13 @@ Route::prefix('/admin')->middleware(['auth', 'isAdmin'])->name('admin.')->group(
     Route::get('/promotions/{promotion}/edit', [PromotionsController::class, 'edit'])->name('promotions.edit');
     Route::put('/promotions/{promotion}', [PromotionsController::class, 'update'])->name('promotions.update');
     Route::delete('/promotions/{promotion}', [PromotionsController::class, 'destroy'])->name('promotions.destroy');
+
+    Route::get('/orders', [OrdersController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [OrdersController::class, 'show'])->name('orders.show');
+    Route::put('/orders/{order}', [OrdersController::class, 'update'])->name('orders.update');
+
+    Route::get('/settings/home', [HomeSettingsController::class, 'edit'])->name('settings.home.edit');
+    Route::post('/settings/home', [HomeSettingsController::class, 'update'])->name('settings.home.update');
+    Route::delete('/settings/home', [HomeSettingsController::class, 'destroy'])->name('settings.home.destroy');
 
 });

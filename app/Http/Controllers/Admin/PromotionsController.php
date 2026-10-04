@@ -88,11 +88,37 @@ class PromotionsController extends Controller
     protected function formOptions(): array
     {
         return [
-            'products' => Product::orderBy('name')->get(['id', 'name']),
+            'products' => $this->productOptions(),
             'categories' => Category::orderBy('name')->get(['id', 'name']),
             'brands' => Brand::orderBy('name')->get(['id', 'name']),
             'colors' => Color::orderBy('name')->get(['id', 'name', 'hex_code']),
         ];
+    }
+
+    /**
+     * Products with what the picker needs to search, filter and pick colors.
+     */
+    protected function productOptions(): array
+    {
+        return Product::query()
+            ->with([
+                'images' => fn ($q) => $q->orderByDesc('is_primary')->orderBy('sort_order'),
+                'variants:id,product_id,color_id',
+            ])
+            ->orderBy('name')
+            ->get(['id', 'name', 'category_id', 'brand_id', 'is_active'])
+            ->map(fn (Product $product) => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'category_id' => $product->category_id,
+                'brand_id' => $product->brand_id,
+                'is_active' => (bool) $product->is_active,
+                'image' => $product->images->first()?->path
+                    ? '/storage/'.$product->images->first()->path
+                    : null,
+                'color_ids' => $product->variants->pluck('color_id')->filter()->unique()->values(),
+            ])
+            ->all();
     }
 
     protected function transformForEdit(Promotion $promotion): array

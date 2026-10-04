@@ -78,6 +78,16 @@ class PromotionRequest extends FormRequest
                         'Color can only be set when the target type is product.'
                     );
                 }
+
+                if ($colorId && $type === 'product' && $targetId && !DB::table('product_variants')
+                    ->where('product_id', $targetId)
+                    ->where('color_id', $colorId)
+                    ->exists()) {
+                    $validator->errors()->add(
+                        "targets.$index.color_id",
+                        'The selected product is not available in this color.'
+                    );
+                }
             }
         });
     }

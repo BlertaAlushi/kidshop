@@ -64,6 +64,8 @@ class OrderService
                         'color_name' => $cartItem->productVariant->color?->name,
                         'original_unit_price' => $variant->price,
                         'discount_amount' => $pricing['discount_amount'],
+                        'promotion_id' => $pricing['promotion']['id'] ?? null,
+                        'promotion_name' => $pricing['promotion']['name'] ?? null,
                         'unit_price' => $pricing['price'],
                         'quantity' => $cartItem->quantity,
                         'total' => $lineTotal,

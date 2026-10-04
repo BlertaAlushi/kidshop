@@ -20,6 +20,9 @@ const props = defineProps<{
     new_arrivals: {
         data: ProductVariantListItem[];
     };
+    hero_background_image?: string | null;
+    hero_title?: string | null;
+    hero_description?: string | null;
 }>();
 
 const rowOne = computed(() =>
@@ -46,41 +49,30 @@ const perks = [
         <div class="flex w-full flex-col overflow-hidden">
             <section class="relative isolate">
                 <div
-                    class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[36rem] overflow-hidden"
-                >
-                    <div
-                        class="absolute -top-24 left-1/2 h-[28rem] w-[42rem] -translate-x-1/2 rounded-full bg-[hsl(43_90%_82%)] opacity-60 blur-3xl dark:bg-[hsl(43_60%_35%)] dark:opacity-20"
-                    />
-                    <div
-                        class="absolute top-10 -left-16 h-72 w-72 rounded-full bg-[hsl(200_85%_85%)] opacity-50 blur-3xl dark:bg-[hsl(200_60%_30%)] dark:opacity-20"
-                    />
-                    <div
-                        class="absolute top-24 -right-16 h-72 w-72 rounded-full bg-[hsl(340_80%_88%)] opacity-50 blur-3xl dark:bg-[hsl(340_55%_30%)] dark:opacity-20"
-                    />
-                </div>
-
+                    v-if="hero_background_image"
+                    class="absolute inset-0 -z-20 bg-cover bg-center bg-no-repeat"
+                    :style="{ backgroundImage: `url(${hero_background_image})` }"
+                />
+                <div
+                    v-if="hero_background_image"
+                    class="absolute inset-0 -z-20 bg-black/50"
+                />
                 <div
                     class="mx-auto flex w-full max-w-7xl flex-col items-center gap-6 px-6 py-20 text-center sm:py-28"
                 >
-                    <span
-                        class="inline-flex items-center gap-1.5 rounded-full bg-secondary px-4 py-1.5 text-xs font-medium tracking-wide text-secondary-foreground uppercase"
-                    >
-                        <Sparkles class="size-3.5" />
-                        {{ t('home.new_arrivals') }}
-                    </span>
                     <h1
-                        class="max-w-2xl text-4xl font-semibold tracking-tight text-balance sm:text-6xl"
+                        class="max-w-2xl text-4xl font-semibold tracking-tight text-balance drop-shadow-md sm:text-6xl"
+                        :class="hero_background_image ? 'text-white' : 'text-foreground'"
                     >
-                        Style that keeps up with them
+                        {{ hero_title }}
                     </h1>
                     <p
-                        class="max-w-xl text-base text-muted-foreground sm:text-lg"
+                        class="max-w-xl text-base drop-shadow-md sm:text-lg"
+                        :class="hero_background_image ? 'text-white/90' : 'text-muted-foreground'"
                     >
-                        Fresh drops for every adventure — from playground
-                        mornings to pajama nights. Playful, comfy, made to
-                        move.
+                        {{ hero_description }}
                     </p>
-                    <div class="mt-2 flex flex-wrap items-center justify-center gap-3">
+                    <div class="mt-2 flex flex-wrap items-center justify-center gap-3 drop-shadow-lg">
                         <Button as-child size="lg" class="rounded-full px-8">
                             <Link :href="route('collection.all')">
                                 Shop all products
@@ -99,6 +91,17 @@ const perks = [
                     </div>
                 </div>
             </section>
+
+            <div class="flex items-center justify-center gap-4 pt-10 pb-8">
+                <span class="h-px w-10 bg-border sm:w-16" />
+                <span
+                    class="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-5 py-2 text-xs font-semibold tracking-[0.2em] text-primary uppercase shadow-sm"
+                >
+                    <Sparkles class="size-3.5" />
+                    {{ t('home.new_arrivals') }}
+                </span>
+                <span class="h-px w-10 bg-border sm:w-16" />
+            </div>
 
             <div
                 v-if="new_arrivals.data.length"

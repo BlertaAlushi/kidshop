@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import FormCreateEditPromotion from '@/components/Forms/FormCreateEditPromotion.vue';
 import AppLayout from '@/layouts/AdminLayout.vue';
-import { type BreadcrumbItem, Brand, Category, Color } from '@/types';
+import { type BreadcrumbItem, Brand, Category, Color, PromotionProductOption } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { route } from 'ziggy-js';
@@ -9,7 +9,7 @@ import { route } from 'ziggy-js';
 const { t } = useI18n();
 
 defineProps<{
-    products: { id: number; name: string }[];
+    products: PromotionProductOption[];
     categories: Category[];
     brands: Brand[];
     colors: Color[];

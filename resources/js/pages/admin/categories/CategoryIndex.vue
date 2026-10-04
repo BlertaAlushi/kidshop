@@ -2,11 +2,13 @@
 import AppLayout from '@/layouts/AdminLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
+import { h } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { route } from 'ziggy-js';
 
 import { ColumnDef } from '@tanstack/vue-table';
 
+import ActiveBadge from '@/components/ActiveBadge.vue';
 import DataTable from '@/components/DataTable.vue';
 
 const { t } = useI18n();
@@ -20,10 +22,21 @@ defineProps<{
 }>();
 
 const columns: ColumnDef<any>[] = [
-    { accessorKey: 'id', header: 'ID' },
-    { accessorKey: 'name', header: t('admin.name') },
-    { accessorKey: 'slug', header: t('admin.slug') },
-    { accessorKey: 'is_active', header: t('admin.is_active') },
+    {
+        accessorKey: 'name',
+        header: t('admin.name'),
+        cell: (info) => h('span', { class: 'font-medium' }, info.getValue() as string),
+    },
+    {
+        accessorKey: 'slug',
+        header: t('admin.slug'),
+        cell: (info) => h('span', { class: 'text-muted-foreground' }, info.getValue() as string),
+    },
+    {
+        accessorKey: 'is_active',
+        header: t('admin.is_active'),
+        cell: (info) => h(ActiveBadge, { active: !!info.getValue() }),
+    },
 ];
 </script>
 
@@ -35,6 +48,7 @@ const columns: ColumnDef<any>[] = [
             :table_rows="categories"
             :columns="columns"
             page_name="categories"
+            :title="t('home.categories')"
         />
     </AppLayout>
 </template>

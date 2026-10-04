@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, List } from 'lucide-vue-next';
+import { LayoutGrid, List, Settings, ShoppingBag } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
@@ -25,6 +25,11 @@ const mainNavItems = computed<NavItem[]>(() => [
         title: 'Dashboard',
         href: route('admin.dashboard'),
         icon: LayoutGrid,
+    },
+    {
+        title: t('admin.orders.title'),
+        href: route('admin.orders.index'),
+        icon: ShoppingBag,
     },
     {
         title: t('home.products'),
@@ -60,6 +65,11 @@ const mainNavItems = computed<NavItem[]>(() => [
         title: t('home.promotions'),
         href: route('admin.promotions.index'),
         icon: List,
+    },
+    {
+        title: t('admin.home_settings.title'),
+        href: route('admin.settings.home.edit'),
+        icon: Settings,
     },
 ]);
 

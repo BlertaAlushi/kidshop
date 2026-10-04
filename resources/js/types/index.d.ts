@@ -251,6 +251,16 @@ export interface PromotionTargetForm {
     color_id: number | null;
 }
 
+export interface PromotionProductOption {
+    id: number;
+    name: string;
+    category_id: number | null;
+    brand_id: number | null;
+    is_active: boolean;
+    image: string | null;
+    color_ids: number[];
+}
+
 export interface Promotion {
     id: number;
     name: string;

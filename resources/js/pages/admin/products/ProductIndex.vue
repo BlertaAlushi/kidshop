@@ -2,11 +2,13 @@
 import AppLayout from '@/layouts/AdminLayout.vue';
 import { type BreadcrumbItem, AdminProduct } from '@/types';
 import { Head } from '@inertiajs/vue3';
+import { h } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { route } from 'ziggy-js';
 
 import { ColumnDef } from '@tanstack/vue-table';
 
+import ActiveBadge from '@/components/ActiveBadge.vue';
 import DataTable from '@/components/DataTable.vue';
 
 const { t } = useI18n();
@@ -19,28 +21,58 @@ defineProps<{
     products: AdminProduct[];
 }>();
 
+const genderColors: Record<string, string> = {
+    boy: 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300',
+    girl: 'bg-pink-100 text-pink-800 dark:bg-pink-900/40 dark:text-pink-300',
+    unisex: 'bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300',
+};
+
+const textOrDash = (value: string | undefined) =>
+    h('span', { class: value ? '' : 'text-muted-foreground' }, value ?? '—');
+
 const columns: ColumnDef<any>[] = [
-    { accessorKey: 'id', header: 'ID' },
-    { accessorKey: 'name', header: t('admin.name') },
     {
-        accessorKey: 'category',
+        accessorKey: 'name',
+        header: t('admin.name'),
+        cell: (info) =>
+            h('div', [
+                h('div', { class: 'font-medium' }, info.getValue() as string),
+                h('div', { class: 'text-xs text-muted-foreground' }, info.row.original.slug),
+            ]),
+    },
+    {
+        id: 'category',
+        accessorFn: (row) => row.category?.name,
         header: t('admin.category'),
-        cell: (info) => info.row.original.category?.name ?? '-',
+        cell: (info) => textOrDash(info.getValue() as string | undefined),
     },
     {
-        accessorKey: 'brand',
+        id: 'brand',
+        accessorFn: (row) => row.brand?.name,
         header: t('home.brand'),
-        cell: (info) => info.row.original.brand?.name ?? '-',
+        cell: (info) => textOrDash(info.getValue() as string | undefined),
     },
-    { accessorKey: 'gender', header: t('admin.gender') },
+    {
+        accessorKey: 'gender',
+        header: t('admin.gender'),
+        cell: (info) => {
+            const gender = info.getValue() as string;
+            return h(
+                'span',
+                { class: ['whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium', genderColors[gender]] },
+                t('admin.' + gender),
+            );
+        },
+    },
     {
         accessorKey: 'variants_count',
         header: t('admin.variants'),
+        cell: (info) => h('span', { class: 'tabular-nums' }, String(info.getValue() ?? 0)),
     },
     {
         accessorKey: 'is_active',
         header: t('admin.is_active'),
-        cell: (info) => (info.row.original.is_active ? t('admin.yes') : t('admin.no')),
+        cell: (info) => h(ActiveBadge, { active: !!info.getValue() }),
     },
 ];
 </script>
@@ -49,6 +81,6 @@ const columns: ColumnDef<any>[] = [
     <Head :title="t('home.products')" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <DataTable :table_rows="products" :columns="columns" page_name="products" />
+        <DataTable :table_rows="products" :columns="columns" page_name="products" :title="t('home.products')" />
     </AppLayout>
 </template>

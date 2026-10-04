@@ -15,6 +15,8 @@ class OrderItem extends Model
         'color_name',
         'original_unit_price',
         'discount_amount',
+        'promotion_id',
+        'promotion_name',
         'unit_price',
         'quantity',
         'total',
@@ -38,5 +40,10 @@ class OrderItem extends Model
     public function productVariant(): BelongsTo
     {
         return $this->belongsTo(ProductVariant::class);
+    }
+
+    public function promotion(): BelongsTo
+    {
+        return $this->belongsTo(Promotion::class);
     }
 }
