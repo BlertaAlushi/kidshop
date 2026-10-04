@@ -35,6 +35,7 @@ import {
 import { useI18n } from 'vue-i18n';
 import { Button } from '@/components/ui/button';
 import SearchOverlay from '@/components/SearchOverlay.vue';
+import { route } from 'ziggy-js';
 
 const page = usePage<PageType>();
 
@@ -68,7 +69,10 @@ const form = reactive<Filters>({
     order_by: props.filters.order_by ?? null,
     per_page: props.filters.per_page ?? null,
     search: props.filters.search ?? null,
+    on_sale: !!props.filters.on_sale,
 });
+
+const isSaleCollection = route().current('collection.sale');
 
 watch(
     form,
@@ -78,7 +82,7 @@ watch(
         Object.entries(form).forEach(([key, value]) => {
             if (Array.isArray(value)) {
                 if (value.length > 0) query[key] = value;
-            } else if (value != null && value !== '') {
+            } else if (value != null && value !== '' && value !== false) {
                 query[key] = value;
             }
         });
@@ -107,7 +111,8 @@ const activeFilterCount = computed(
         form.seasons.length +
         form.colors.length +
         form.sizes.length +
-        (form.gender ? 1 : 0),
+        (form.gender ? 1 : 0) +
+        (form.on_sale && !isSaleCollection ? 1 : 0),
 );
 </script>
 
@@ -129,7 +134,7 @@ const activeFilterCount = computed(
                     class="flex flex-wrap items-center justify-between gap-3"
                 >
                     <h1 class="text-xl font-semibold tracking-tight">
-                        {{ t('home.products') }}
+                        {{ form.on_sale ? t('home.sale') : t('home.products') }}
                     </h1>
                     <div class="flex flex-wrap items-center gap-2">
                         <div class="lg:hidden">

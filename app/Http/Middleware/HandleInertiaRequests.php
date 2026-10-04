@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 use App\Services\CartService;
 use App\Services\FilterOptionsService;
+use App\Services\Products\PromotionPricingService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -55,6 +56,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'cartProductCount'=>CartService::cartProductCount(),
             'cartTotalPrice'=> CartService::cartTotal(),
+            'activePromotions' => fn () => resolve(PromotionPricingService::class)->bannerPromotions(),
         ];
     }
 }

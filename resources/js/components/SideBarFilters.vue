@@ -3,6 +3,7 @@ import { reactive, watch } from 'vue';
 import { type Filters, MenuType, MenuItem } from '@/types';
 import { ChevronUp, ChevronDown } from 'lucide-vue-next';
 import { useI18n } from 'vue-i18n';
+import { route } from 'ziggy-js';
 const { t } = useI18n();
 
 const props = defineProps<{
@@ -20,7 +21,11 @@ const form = reactive<Filters>({
     order_by: props.filters.order_by ?? null,
     per_page: props.filters.per_page ?? null,
     search: props.filters.search ?? null,
+    on_sale: !!props.filters.on_sale,
 });
+
+// The sale collection always filters by on_sale, so the toggle would do nothing there.
+const showSaleToggle = !route().current('collection.sale');
 
 type CheckboxGroupKey = 'categories' | 'brands' | 'seasons' | 'colors' | 'sizes';
 
@@ -87,6 +92,7 @@ watch(
             colors: [...form.colors],
             sizes: [...form.sizes],
             gender: form.gender,
+            on_sale: form.on_sale,
         });
     },
     { deep: true },
@@ -95,6 +101,17 @@ watch(
 
 <template>
     <aside class="h-fit w-full shrink-0 lg:sticky lg:top-24">
+        <label
+            v-if="showSaleToggle"
+            class="mb-5 flex cursor-pointer items-center gap-2.5 border-b border-border pb-3 text-sm font-semibold"
+        >
+            <input
+                type="checkbox"
+                v-model="form.on_sale"
+                class="h-4 w-4 cursor-pointer rounded border-input accent-red-600"
+            />
+            <span class="text-red-600">{{ t('home.on_sale') }}</span>
+        </label>
         <div v-for="group in filterGroups" :key="group.key">
             <div v-if="group.items.length" class="mb-5">
                 <button

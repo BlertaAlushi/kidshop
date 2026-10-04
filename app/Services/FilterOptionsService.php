@@ -32,6 +32,7 @@ class FilterOptionsService
             'per_page'=> $request->per_page ?? null,
             'order_by'=> $request->order_by ?? null,
             'search'=> $request->search ?? null,
+            'on_sale'=> $request->boolean('on_sale'),
         ];
     }
 }

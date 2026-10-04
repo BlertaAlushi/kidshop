@@ -5,6 +5,7 @@ import { router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ProductPrice from '@/components/ProductPrice.vue';
+import { formatPromotionDiscount } from '@/lib/promotion';
 import {
     Item,
     ItemContent,
@@ -57,6 +58,13 @@ const isSoldOut = computed(() => props.item.stock_quantity <= 0);
                                 : 'group-hover:scale-105'
                         "
                     />
+                    <span
+                        v-if="item.promotion && !isSoldOut"
+                        class="absolute top-2.5 left-2.5 rounded-full bg-red-600 px-2.5 py-1 text-xs font-semibold tracking-wide text-white uppercase shadow-sm"
+                    >
+                        {{ t('home.sale') }}
+                        {{ formatPromotionDiscount(item.promotion) }}
+                    </span>
                     <div
                         v-if="isSoldOut"
                         class="absolute inset-0 flex items-center justify-center"

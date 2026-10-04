@@ -51,6 +51,7 @@ export interface PromotionInfo {
     name: string;
     type: 'percentage' | 'fixed';
     value: number;
+    ends_at: string | null;
 }
 
 export interface ProductVariantOption {
@@ -135,6 +136,7 @@ export interface Filters {
     per_page: string | null;
     order_by: string | null;
     search:string | '';
+    on_sale: boolean;
 }
 
 export interface MenuItem {
@@ -163,6 +165,7 @@ export interface PageType extends AppPageProps{
     };
     cartProductCount:number;
     cartTotalPrice:number;
+    activePromotions: PromotionInfo[];
 }
 
 export interface Item{

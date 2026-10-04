@@ -67,6 +67,10 @@ class ProductsCollectionService implements ProductsCollectionInterface
             $items = $items->filter(fn ($item) => in_array($item['color_id'], $filters['colors']));
         }
 
+        if (!empty($filters['on_sale'])) {
+            $items = $items->filter(fn ($item) => $item['promotion'] !== null);
+        }
+
         switch ($filters['order_by'] ?? null) {
             case 'price_high_to_low':
                 $items = $items->sortByDesc('price');

@@ -60,5 +60,11 @@
     "checkout_description": "Shipping and taxes will be calculated at checkout",
     "order_error": "Error while ordering",
     "order_success": "Your order is done successfully. Thank you!",
-    "cart": "Cart"
+    "cart": "Cart",
+    "sale": "Sale",
+    "on_sale": "On sale",
+    "sale_on": "Sale is on",
+    "sale_up_to": "Sale: up to {discount} off",
+    "shop_sale": "Shop now",
+    "promotion_ends": "Ends on {date}"
 }

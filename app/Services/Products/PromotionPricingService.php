@@ -29,6 +29,30 @@ class PromotionPricingService
             ->get();
     }
 
+    /**
+     * Active promotions that apply to at least one target, soonest-ending first.
+     */
+    public function bannerPromotions(): array
+    {
+        return $this->activePromotions()
+            ->filter(fn (Promotion $promotion) => $promotion->targets->isNotEmpty())
+            ->sortBy(fn (Promotion $promotion) => $promotion->ends_at?->timestamp ?? PHP_INT_MAX)
+            ->map(fn (Promotion $promotion) => $this->promotionData($promotion))
+            ->values()
+            ->all();
+    }
+
+    protected function promotionData(Promotion $promotion): array
+    {
+        return [
+            'id' => $promotion->id,
+            'name' => $promotion->name,
+            'type' => $promotion->type,
+            'value' => (float) $promotion->value,
+            'ends_at' => $promotion->ends_at?->toIso8601String(),
+        ];
+    }
+
     public function priceForVariant(ProductVariant $variant): array
     {
         return $this->priceFor($variant->product, $variant->color_id, (float) $variant->price);
@@ -77,12 +101,7 @@ class PromotionPricingService
             'price' => $finalPrice,
             'original_price' => $bestPromotion ? $price : null,
             'discount_amount' => $bestPromotion ? $bestDiscount : 0.0,
-            'promotion' => $bestPromotion ? [
-                'id' => $bestPromotion->id,
-                'name' => $bestPromotion->name,
-                'type' => $bestPromotion->type,
-                'value' => (float) $bestPromotion->value,
-            ] : null,
+            'promotion' => $bestPromotion ? $this->promotionData($bestPromotion) : null,
         ];
     }
 }

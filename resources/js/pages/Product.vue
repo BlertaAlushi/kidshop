@@ -16,7 +16,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { route } from 'ziggy-js';
-import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
+import { ChevronLeft, ChevronRight, Tag } from 'lucide-vue-next';
+import {
+    formatPromotionDiscount,
+    formatPromotionEndDate,
+} from '@/lib/promotion';
 
 const { t } = useI18n();
 
@@ -138,10 +142,18 @@ const displayPrice = computed(
     () => selectedVariant.value?.price ?? props.product.data.price,
 );
 
-const displayOriginalPrice = computed(
-    () =>
-        selectedVariant.value?.original_price ??
-        props.product.data.original_price,
+// A selected variant without a promotion has null original_price/promotion,
+// so only fall back to the product-level values when no variant is selected.
+const displayOriginalPrice = computed(() =>
+    selectedVariant.value
+        ? selectedVariant.value.original_price
+        : props.product.data.original_price,
+);
+
+const displayPromotion = computed(() =>
+    selectedVariant.value
+        ? selectedVariant.value.promotion
+        : props.product.data.promotion,
 );
 
 const inStock = computed(
@@ -230,12 +242,36 @@ const addToCart = () => {
                         {{ product.data.name }}
                     </h1>
 
-                    <div>
+                    <div class="flex flex-col gap-3">
                         <ProductPrice
                             :price="displayPrice"
                             :original-price="displayOriginalPrice"
                             size="lg"
                         />
+                        <div
+                            v-if="displayPromotion"
+                            class="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+                        >
+                            <Tag class="mt-0.5 size-4 shrink-0" />
+                            <div class="flex flex-col gap-0.5">
+                                <span class="font-semibold">
+                                    {{ displayPromotion.name }}:
+                                    {{ formatPromotionDiscount(displayPromotion) }}
+                                </span>
+                                <span
+                                    v-if="displayPromotion.ends_at"
+                                    class="text-red-600/80 dark:text-red-300/80"
+                                >
+                                    {{
+                                        t('home.promotion_ends', {
+                                            date: formatPromotionEndDate(
+                                                displayPromotion.ends_at,
+                                            ),
+                                        })
+                                    }}
+                                </span>
+                            </div>
+                        </div>
                     </div>
 
                     <div v-if="colors.length" class="flex flex-col gap-2">

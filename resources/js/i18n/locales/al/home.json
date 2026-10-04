@@ -59,5 +59,11 @@
     "checkout_description": "Transporti dhe taksat do të llogariten gjatë pagesës",
     "order_error": "Gabim gjatë porosisë",
     "order_success": "Porosia juaj u krye me sukses. Faleminderit!",
-    "cart": "Shporta"
+    "cart": "Shporta",
+    "sale": "Ofertë",
+    "on_sale": "Në ofertë",
+    "sale_on": "Ofertat kanë filluar",
+    "sale_up_to": "Ofertë: deri në {discount} zbritje",
+    "shop_sale": "Bli tani",
+    "promotion_ends": "Përfundon më {date}"
 }

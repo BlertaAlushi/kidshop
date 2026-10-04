@@ -28,6 +28,16 @@ class ProductsController extends Controller
         ]);
     }
 
+    public function sale(Request $request) {
+        $filters = FilterOptionsService::filters($request);
+        $filters['on_sale'] = true;
+        $products = $this->productsCollection->products($filters);
+        return Inertia::render('Collections', [
+            'filters' => $filters,
+            'products' => $products,
+        ]);
+    }
+
     public function filterByCategory(Request $request, Category $category){
         $filters = FilterOptionsService::filters($request);
         $filters['categories'] = [$category->id];
